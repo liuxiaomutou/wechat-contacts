@@ -1,0 +1,39 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/contact-detail/index",
+    "pages/contact-edit/index",
+    "pages/groups/index",
+    "pages/search/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#07c160",
+    "navigationBarTitleText": "通讯录",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f5f5f5",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#999",
+    "selectedColor": "#07c160",
+    "backgroundColor": "#fff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "联系人",
+        "iconPath": "images/contacts.png",
+        "selectedIconPath": "images/contacts-active.png"
+      },
+      {
+        "pagePath": "pages/groups/index",
+        "text": "分组",
+        "iconPath": "images/groups.png",
+        "selectedIconPath": "images/groups-active.png"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents"
+}

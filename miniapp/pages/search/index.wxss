@@ -1,0 +1,133 @@
+/* pages/search/index.wxss */
+
+/* 搜索框容器 */
+.search-bar {
+  padding: 20rpx 30rpx;
+  background-color: #fff;
+  border-bottom: 1rpx solid #eee;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: #f5f5f5;
+  border-radius: 8rpx;
+  padding: 16rpx 20rpx;
+  height: 72rpx;
+  box-sizing: border-box;
+}
+
+.search-icon {
+  flex-shrink: 0;
+  margin-right: 10rpx;
+}
+
+.search-input {
+  flex: 1;
+  height: 40rpx;
+  font-size: 28rpx;
+  color: #333;
+  line-height: 40rpx;
+}
+
+.search-clear {
+  flex-shrink: 0;
+  padding: 8rpx;
+  margin-left: 10rpx;
+}
+
+/* 搜索结果信息栏 */
+.search-info {
+  padding: 16rpx 30rpx;
+  background-color: #f9f9f9;
+}
+
+.search-info-text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 搜索结果列表 */
+.search-results {
+  position: fixed;
+  top: 192rpx;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 30rpx;
+  box-sizing: border-box;
+}
+
+/* 搜索结果项 */
+.search-result-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx !important;
+  margin-bottom: 20rpx;
+  position: relative;
+}
+
+.search-result-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.search-result-avatar text {
+  font-size: 32rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.search-result-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.search-result-name {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 8rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result-phone {
+  font-size: 26rpx;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result-arrow {
+  font-size: 36rpx;
+  color: #ccc;
+  margin-left: 16rpx;
+  flex-shrink: 0;
+}
+
+/* 空状态提示 */
+.search-page .empty-state {
+  padding-top: 200rpx;
+}
+
+.search-page .empty-state .empty-title {
+  margin-top: 24rpx;
+  font-size: 32rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.search-page .empty-state .empty-desc {
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: #999;
+}

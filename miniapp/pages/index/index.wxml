@@ -1,0 +1,103 @@
+<!-- 通讯录首页 — iOS 风格简洁清爽 -->
+<view class="page-container">
+
+  <!-- ===== 搜索栏 ===== -->
+  <view class="search-bar" bindtap="onSearchTap">
+    <view class="search-bar-inner">
+      <text class="icon-search">🔍</text>
+      <text>搜索联系人</text>
+    </view>
+  </view>
+
+  <!-- ===== 筛选栏 ===== -->
+  <view class="filter-bar">
+    <scroll-view class="filter-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+      <view
+        class="filter-tag {{selectedGroupId === '' ? 'active' : ''}}"
+        data-group-id=""
+        bindtap="onGroupFilter"
+      >全部</view>
+      <view
+        wx:for="{{groups}}"
+        wx:key="id"
+        class="filter-tag {{selectedGroupId === item.id ? 'active' : ''}}"
+        data-group-id="{{item.id}}"
+        bindtap="onGroupFilter"
+      >{{item.name}}</view>
+    </scroll-view>
+    <view
+      class="filter-btn-fav {{showFavoriteOnly ? 'active' : ''}}"
+      bindtap="onFavoriteFilter"
+    >
+      <text class="star-icon">{{showFavoriteOnly ? '★' : '☆'}}</text>
+    </view>
+  </view>
+
+  <!-- ===== 加载中（首次） ===== -->
+  <view wx:if="{{loading && contacts.length === 0}}" class="loading-container">
+    <view style="text-align:center;">
+      <text style="font-size:32px;">⏳</text>
+      <text style="display:block;margin-top:8px;color:#999;font-size:13px;">加载中...</text>
+    </view>
+  </view>
+
+  <!-- ===== 联系人列表 ===== -->
+  <view wx:elif="{{contacts.length > 0}}" class="contact-list">
+    <view class="list-card">
+      <view
+        wx:for="{{contacts}}"
+        wx:key="id"
+        class="contact-card"
+        data-id="{{item.id}}"
+        bindtap="onContactTap"
+      >
+        <!-- 头像圆圈（姓名首字 + 颜色） -->
+        <view
+          class="avatar-circle"
+          style="background-color: {{getColorByIndex(index)}};"
+        >{{item.name ? item.name.charAt(0) : '?'}}</view>
+
+        <!-- 信息区域 -->
+        <view class="contact-info">
+          <view class="contact-name-row">
+            <text class="contact-name">{{item.name}}</text>
+            <text wx:if="{{item.favorite}}" class="contact-fav-star">★</text>
+          </view>
+          <view wx:if="{{item.company || item.position}}" class="contact-desc">
+            {{item.company}}{{item.company && item.position ? ' · ' : ''}}{{item.position}}
+          </view>
+          <!-- 分组标签（最多显示2个，显示分组名称） -->
+          <view wx:if="{{item.groups && item.groups.length > 0}}" class="contact-groups">
+            <text
+              wx:for="{{item.groups.slice(0, 2)}}"
+              wx:key="groupId"
+              class="group-tag"
+            >{{item.group ? item.group.name : item.name}}</text>
+            <text wx:if="{{item.groups.length > 2}}" class="group-tag" style="background:#f0f0f0;color:#999;">+{{item.groups.length - 2}}</text>
+          </view>
+        </view>
+
+        <!-- 右箭头 -->
+        <text class="contact-arrow">›</text>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{loadingMore}}" class="loading-more">
+      <text>⏳</text>
+      <text>加载中...</text>
+    </view>
+    <view wx:elif="{{!hasMore && contacts.length > 0}}" class="no-more">—— 没有更多了 ——</view>
+  </view>
+
+  <!-- ===== 空状态 ===== -->
+  <view wx:elif="{{!loading && contacts.length === 0}}" class="empty-state">
+    <text class="empty-icon">📭</text>
+    <text>暂无联系人</text>
+    <text class="empty-sub">点击右下角 + 添加</text>
+  </view>
+
+  <!-- ===== 浮动添加按钮 ===== -->
+  <view class="fab-add" bindtap="onAddTap">+</view>
+
+</view>

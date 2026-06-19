@@ -1,0 +1,71 @@
+/* 全局样式 */
+page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  color: #333;
+  background-color: #f5f5f5;
+  box-sizing: border-box;
+}
+
+/* 微信小程序 2B 以下支持 */
+view, text, image, input, button, scroll-view, swiper {
+  box-sizing: border-box;
+}
+
+/* 通用卡片 */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  margin: 10px 16px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* 按钮基础 */
+.btn-primary {
+  width: 100%;
+  height: 44px;
+  line-height: 44px;
+  background: #07c160;
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+}
+
+.btn-primary:active {
+  opacity: 0.8;
+}
+
+/* 表单标题 */
+.form-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+}
+
+.empty-state text {
+  color: #999;
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+/* loading */
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
