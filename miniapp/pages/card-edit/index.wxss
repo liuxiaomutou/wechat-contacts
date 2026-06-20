@@ -1,6 +1,15 @@
 .container { background:#f5f6f7; min-height:100vh; padding:24rpx 0 120rpx; }
 .section { background:#fff; margin:0 24rpx 24rpx; padding:28rpx; border-radius:18rpx; box-shadow:0 4rpx 16rpx rgba(0,0,0,.03); }
 .section-title { display:block; font-size:31rpx; font-weight:700; color:#222; margin-bottom:20rpx; padding-bottom:14rpx; border-bottom:1rpx solid #eee; }
+.section-title.no-border { margin:0; padding:0; border:0; }
+.section-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20rpx; }
+.section-head.mt { margin-top:22rpx; }
+.circle-add { width:56rpx; height:56rpx; border-radius:50%; background:#07c160; color:#fff; display:flex; align-items:center; justify-content:center; font-size:38rpx; font-weight:500; }
+.avatar-uploader { width:180rpx; height:180rpx; border-radius:18rpx; border:2rpx dashed #cfd5dc; margin:0 auto 28rpx; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#fafafa; }
+.avatar-preview { width:100%; height:100%; }
+.avatar-empty { color:#07c160; display:flex; flex-direction:column; align-items:center; font-size:24rpx; }
+.avatar-empty .plus { font-size:56rpx; line-height:60rpx; }
+.year-row { display:flex; gap:12rpx; }
 .form-item { display:flex; align-items:center; margin-bottom:18rpx; }
 .label { width:150rpx; flex-shrink:0; font-size:27rpx; color:#666; }
 .input { flex:1; min-height:72rpx; font-size:28rpx; padding:0 18rpx; border:1rpx solid #e5e7eb; border-radius:14rpx; background:#fff; box-sizing:border-box; }

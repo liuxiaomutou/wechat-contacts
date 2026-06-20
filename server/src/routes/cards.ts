@@ -6,15 +6,19 @@ const router = Router();
 const ROLE_HIERARCHY: Record<string, number> = { admin: 4, manager: 3, editor: 2, viewer: 1 };
 const JSON_FIELDS = ['phones', 'emails', 'educationBackground', 'workExperience', 'socialPositions', 'skills'];
 const SIMPLE_FIELDS = [
-  'email', 'company', 'position', 'jobLevel', 'industry', 'field', 'gender',
+  'email', 'company', 'position', 'industry', 'field', 'gender',
+  'solarBirthday', 'lunarBirthday', 'ethnicity', 'maritalStatus',
+  'province', 'city', 'district', 'township', 'detailAddress',
   'residentialAddress', 'hometownAddress', 'birthplace', 'wechat', 'qq',
   'website', 'linkedin', 'fax', 'tags', 'remark', 'avatar', 'isPublic',
 ];
 const DEFAULT_LIBRARY_FIELDS: Record<string, boolean> = {
   avatar: true, company: true, position: true, phone: true, phones: true, email: true, emails: true,
   wechat: true, educationBackground: true, workExperience: true, tags: true, remark: true,
-  residentialAddress: false, hometownAddress: false, birthplace: false, qq: false, website: false,
-  linkedin: false, fax: false, socialPositions: true, skills: true, industry: true, field: true, jobLevel: true, gender: true,
+  residentialAddress: false, hometownAddress: false, birthplace: true, qq: false, website: false,
+  linkedin: false, fax: false, socialPositions: true, skills: true, industry: true, field: true, gender: true,
+  solarBirthday: true, lunarBirthday: true, ethnicity: true, maritalStatus: true,
+  province: true, city: true, district: true, township: true, detailAddress: true,
 };
 
 function parseJson(value: any, fallback: any = null) {

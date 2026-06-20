@@ -67,8 +67,28 @@ export function getMe() {
 export function updateMe(data) {
   return request('/auth/me', { method: 'PUT', data });
 }
+export function uploadImage(filePath) {
+  const baseUrl = app.globalData.baseUrl;
+  const token = wx.getStorageSync('token');
+  return new Promise((resolve, reject) => {
+    wx.uploadFile({
+      url: `${baseUrl}/uploads/image`,
+      filePath,
+      name: 'file',
+      header: token ? { Authorization: 'Bearer ' + token } : {},
+      success(res) {
+        try {
+          const data = JSON.parse(res.data || '{}');
+          if (res.statusCode >= 200 && res.statusCode < 300) resolve(data);
+          else reject({ message: data.error || '上传失败' });
+        } catch (e) { reject({ message: '上传结果解析失败' }); }
+      },
+      fail() { reject({ message: '上传失败' }); },
+    });
+  });
+}
 
-// ======== 名片库 ========
+// ======== 名片库 ======
 export function getLibraries() {
   return request('/libraries');
 }

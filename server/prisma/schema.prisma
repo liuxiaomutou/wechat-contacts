@@ -82,7 +82,16 @@ model Card {
   industry           String?  // 行业
   field              String?  // 领域（技术/市场/销售等）
   gender             String?  // 性别
-  residentialAddress String?  // 住宅地址
+  solarBirthday      String?  // 阳历生日 YYYY-MM-DD
+  lunarBirthday      String?  // 农历生日
+  ethnicity          String?  // 民族
+  maritalStatus      String?  // 婚姻
+  province           String?  // 省
+  city               String?  // 市
+  district           String?  // 区/县
+  township           String?  // 街道/乡镇
+  detailAddress      String?  // 详细地址
+  residentialAddress String?  // 住宅地址（兼容旧字段）
   hometownAddress    String?  // 老家地址
   birthplace         String?  // 籍贯
   wechat             String?  // 微信
