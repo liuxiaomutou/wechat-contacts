@@ -1,5 +1,6 @@
 // ===== API 请求封装 =====
-const API_BASE = localStorage.getItem('apiBase') || 'http://localhost:3000/api';
+const defaultApiBase = `${location.protocol}//${location.hostname}:3000/api`;
+const API_BASE = localStorage.getItem('apiBase') || defaultApiBase;
 
 async function api(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...options.headers };
