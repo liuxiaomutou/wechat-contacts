@@ -90,11 +90,12 @@ router.get('/:libraryId', authMiddleware, requireLibraryAccess, async (req: any,
 router.put('/:libraryId', authMiddleware, requireLibraryAccess, requireRole('admin'), async (req: any, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.locals.prisma;
-    const { name, description, avatar } = req.body;
+    const { name, description, avatar, fieldSettings } = req.body;
     const data: any = {};
     if (name !== undefined) data.name = name;
     if (description !== undefined) data.description = description;
     if (avatar !== undefined) data.avatar = avatar;
+    if (fieldSettings !== undefined) data.fieldSettings = typeof fieldSettings === 'string' ? fieldSettings : JSON.stringify(fieldSettings);
 
     const library = await prisma.cardLibrary.update({ where: { id: req.libraryId }, data });
     res.json(library);

@@ -33,6 +33,7 @@ model CardLibrary {
   avatar      String?
   ownerId     Int
   owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  fieldSettings String? // JSON: { fieldName: true/false } 控制该名片库默认显示字段
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -69,10 +70,12 @@ model Card {
 
   // === 基本信息（必填） ===
   name  String  // 姓名
-  phone String  // 手机号（必填）
+  phone String  // 主手机号（兼容旧数据）
+  phones String? // JSON: ["手机号1", "手机号2"]
 
   // === 扩展信息（选填） ===
   email              String?
+  emails             String? // JSON: ["邮箱1", "邮箱2"]
   company            String?  // 公司
   position           String?  // 职位
   jobLevel           String?  // 级别（总监/经理/主管等）

@@ -1,445 +1,91 @@
-<!-- 名片编辑页 -->
 <view class="container">
-  <!-- 基本信息 -->
   <view class="section">
     <text class="section-title">基本信息</text>
-    <view class="form-item">
-      <text class="label">姓名 *</text>
-      <input 
-        class="input" 
-        placeholder="请输入姓名" 
-        value="{{card.name}}" 
-        bindinput="onNameInput" 
-      />
-    </view>
-    <view class="form-item">
-      <text class="label">手机号 *</text>
-      <input 
-        class="input" 
-        placeholder="请输入手机号" 
-        value="{{card.phone}}" 
-        bindinput="onPhoneInput" 
-        type="number" 
-      />
-    </view>
-    <view class="form-item">
-      <text class="label">性别</text>
-      <view class="radio-group">
-        <label class="radio-item" wx:for="{{genders}}" wx:key="index">
-          <radio value="{{item.value}}" checked="{{item.value === card.gender}}" />
-          <text>{{item.label}}</text>
-        </label>
-      </view>
-    </view>
+    <view class="form-item"><text class="label">姓名 *</text><input class="input" value="{{card.name}}" data-field="name" bindinput="setField" placeholder="请输入姓名" /></view>
+    <view class="form-item"><text class="label">照片</text><input class="input" value="{{card.avatar}}" data-field="avatar" bindinput="setField" placeholder="照片 URL" /></view>
+    <view class="form-item"><text class="label">性别</text><picker mode="selector" range="{{genders}}" range-key="label" bindchange="onGenderChange"><view class="picker">{{card.gender || '未设置'}}</view></picker></view>
+    <view class="form-item"><text class="label">公开</text><switch checked="{{card.isPublic}}" bindchange="onPublicChange" /></view>
   </view>
-  
-  <!-- 工作信息 -->
+
   <view class="section">
     <text class="section-title">工作信息</text>
-    <view class="form-item">
-      <text class="label">公司</text>
-      <input 
-        class="input" 
-        placeholder="请输入公司" 
-        value="{{card.company}}" 
-        bindinput="onCompanyInput" 
-      />
-    </view>
-    <view class="form-item">
-      <text class="label">职位</text>
-      <input 
-        class="input" 
-        placeholder="请输入职位" 
-        value="{{card.title}}" 
-        bindinput="onTitleInput" 
-      />
-    </view>
-    <view class="form-item">
-      <text class="label">级别</text>
-      <input 
-        class="input" 
-        placeholder="请输入级别" 
-        value="{{card.level}}" 
-        bindinput="onLevelInput" 
-      />
-    </view>
-    <view class="form-item">
-      <text class="label">行业</text>
-      <input 
-        class="input" 
-        placeholder="请输入行业" 
-        value="{{card.industry}}" 
-        bindinput="onIndustryInput" 
-      />
-    </view>
-    <view class="form-item">
-      <text class="label">领域</text>
-      <input 
-        class="input" 
-        placeholder="请输入领域" 
-        value="{{card.field}}" 
-        bindinput="onFieldInput" 
-      />
-    </view>
+    <view class="form-item"><text class="label">工作单位</text><input class="input" value="{{card.company}}" data-field="company" bindinput="setField" /></view>
+    <view class="form-item"><text class="label">职位</text><input class="input" value="{{card.position}}" data-field="position" bindinput="setField" /></view>
+    <view class="form-item"><text class="label">级别</text><input class="input" value="{{card.jobLevel}}" data-field="jobLevel" bindinput="setField" /></view>
+    <view class="form-item"><text class="label">行业</text><input class="input" value="{{card.industry}}" data-field="industry" bindinput="setField" /></view>
+    <view class="form-item"><text class="label">领域</text><input class="input" value="{{card.field}}" data-field="field" bindinput="setField" /></view>
   </view>
-  
-  <!-- 联系方式 -->
+
   <view class="section">
     <text class="section-title">联系方式</text>
-    <view class="form-item">
-      <text class="label">邮箱</text>
-      <input 
-        class="input" 
-        placeholder="请输入邮箱" 
-        value="{{card.email}}" 
-        bindinput="onEmailInput" 
-        type="email" 
-      />
+    <view class="array-row" wx:for="{{card.phones}}" wx:key="index">
+      <input class="input" value="{{item}}" data-index="{{index}}" bindinput="onPhoneInput" placeholder="电话" />
+      <view class="small-btn muted" data-index="{{index}}" bindtap="removePhone">删</view>
     </view>
-    <view class="form-item">
-      <text class="label">微信</text>
-      <input 
-        class="input" 
-        placeholder="请输入微信" 
-        value="{{card.wechat}}" 
-        bindinput="onWechatInput" 
-      />
+    <view class="add-button" bindtap="addPhone">+ 添加电话</view>
+    <view class="array-row" wx:for="{{card.emails}}" wx:key="index">
+      <input class="input" value="{{item}}" data-index="{{index}}" bindinput="onEmailInput" placeholder="邮箱" />
+      <view class="small-btn muted" data-index="{{index}}" bindtap="removeEmail">删</view>
     </view>
-    <view class="form-item">
-      <text class="label">QQ</text>
-      <input 
-        class="input" 
-        placeholder="请输入QQ" 
-        value="{{card.qq}}" 
-        bindinput="onQqInput" 
-        type="number" 
-      />
-    </view>
-    <view class="form-item">
-      <text class="label">网站</text>
-      <input 
-        class="input" 
-        placeholder="请输入网站" 
-        value="{{card.website}}" 
-        bindinput="onWebsiteInput" 
-      />
-    </view>
-    <view class="form-item">
-      <text class="label">LinkedIn</text>
-      <input 
-        class="input" 
-        placeholder="请输入LinkedIn" 
-        value="{{card.linkedin}}" 
-        bindinput="onLinkedinInput" 
-      />
-    </view>
-    <view class="form-item">
-      <text class="label">传真</text>
-      <input 
-        class="input" 
-        placeholder="请输入传真" 
-        value="{{card.fax}}" 
-        bindinput="onFaxInput" 
-        type="number" 
-      />
-    </view>
+    <view class="add-button" bindtap="addEmail">+ 添加邮箱</view>
+    <view class="form-item"><text class="label">微信</text><input class="input" value="{{card.wechat}}" data-field="wechat" bindinput="setField" /></view>
+    <view class="form-item"><text class="label">QQ</text><input class="input" value="{{card.qq}}" data-field="qq" bindinput="setField" /></view>
+    <view class="form-item"><text class="label">网站</text><input class="input" value="{{card.website}}" data-field="website" bindinput="setField" /></view>
+    <view class="form-item"><text class="label">LinkedIn</text><input class="input" value="{{card.linkedin}}" data-field="linkedin" bindinput="setField" /></view>
+    <view class="form-item"><text class="label">传真</text><input class="input" value="{{card.fax}}" data-field="fax" bindinput="setField" /></view>
   </view>
-  
-  <!-- 个人资料 -->
+
   <view class="section">
     <text class="section-title">个人资料</text>
-    <view class="form-item">
-      <text class="label">住宅地址</text>
-      <input 
-        class="input" 
-        placeholder="请输入住宅地址" 
-        value="{{card.residence}}" 
-        bindinput="onResidenceInput" 
-      />
-    </view>
-    <view class="form-item">
-      <text class="label">籍贯</text>
-      <input 
-        class="input" 
-        placeholder="请输入籍贯" 
-        value="{{card.hometown}}" 
-        bindinput="onHometownInput" 
-      />
-    </view>
-    <view class="form-item">
-      <text class="label">老家地址</text>
-      <input 
-        class="input" 
-        placeholder="请输入老家地址" 
-        value="{{card.originalResidence}}" 
-        bindinput="onOriginalResidenceInput" 
-      />
-    </view>
+    <view class="form-item"><text class="label">籍贯</text><input class="input" value="{{card.birthplace}}" data-field="birthplace" bindinput="setField" /></view>
+    <view class="form-item"><text class="label">住宅地址</text><input class="input" value="{{card.residentialAddress}}" data-field="residentialAddress" bindinput="setField" /></view>
+    <view class="form-item"><text class="label">老家地址</text><input class="input" value="{{card.hometownAddress}}" data-field="hometownAddress" bindinput="setField" /></view>
   </view>
-  
-  <!-- 教育经历 -->
+
   <view class="section">
     <text class="section-title">教育经历</text>
-    <view class="add-button" bindtap="addEducation">
-      <text>+</text>
-      <text>添加教育经历</text>
-    </view>
-    <view class="experience-item" wx:for="{{card.education}}" wx:key="index">
-      <view class="experience-form">
-        <view class="form-item">
-          <text class="label">学校</text>
-          <input 
-            class="input" 
-            placeholder="请输入学校" 
-            value="{{item.school}}" 
-            bindinput="onEducationSchoolInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">专业</text>
-          <input 
-            class="input" 
-            placeholder="请输入专业" 
-            value="{{item.major}}" 
-            bindinput="onEducationMajorInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">学位</text>
-          <input 
-            class="input" 
-            placeholder="请输入学位" 
-            value="{{item.degree}}" 
-            bindinput="onEducationDegreeInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">开始时间</text>
-          <input 
-            class="input" 
-            placeholder="请输入开始时间" 
-            value="{{item.startDate}}" 
-            bindinput="onEducationStartDateInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">结束时间</text>
-          <input 
-            class="input" 
-            placeholder="请输入结束时间" 
-            value="{{item.endDate}}" 
-            bindinput="onEducationEndDateInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">是否高亮</text>
-          <switch 
-            checked="{{item.highlight}}" 
-            bindchange="onEducationHighlightChange" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="remove-button" bindtap="removeEducation" data-index="{{index}}">
-          <text>删除</text>
-        </view>
-      </view>
+    <view class="add-button" bindtap="addEducation">+ 添加教育经历</view>
+    <view class="experience-form" wx:for="{{card.educationBackground}}" wx:key="index">
+      <input class="input" placeholder="学校" value="{{item.school}}" data-index="{{index}}" data-field="school" bindinput="setEducationField" />
+      <input class="input" placeholder="专业" value="{{item.major}}" data-index="{{index}}" data-field="major" bindinput="setEducationField" />
+      <input class="input" placeholder="学位" value="{{item.degree}}" data-index="{{index}}" data-field="degree" bindinput="setEducationField" />
+      <input class="input" placeholder="开始时间" value="{{item.startDate}}" data-index="{{index}}" data-field="startDate" bindinput="setEducationField" />
+      <input class="input" placeholder="结束时间" value="{{item.endDate}}" data-index="{{index}}" data-field="endDate" bindinput="setEducationField" />
+      <view class="remove-button" data-index="{{index}}" bindtap="removeEducation">删除</view>
     </view>
   </view>
-  
-  <!-- 工作经历 -->
+
   <view class="section">
     <text class="section-title">工作经历</text>
-    <view class="add-button" bindtap="addWorkExperience">
-      <text>+</text>
-      <text>添加工作经历</text>
-    </view>
-    <view class="experience-item" wx:for="{{card.workExperience}}" wx:key="index">
-      <view class="experience-form">
-        <view class="form-item">
-          <text class="label">公司</text>
-          <input 
-            class="input" 
-            placeholder="请输入公司" 
-            value="{{item.company}}" 
-            bindinput="onWorkCompanyInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">职位</text>
-          <input 
-            class="input" 
-            placeholder="请输入职位" 
-            value="{{item.position}}" 
-            bindinput="onWorkPositionInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">部门</text>
-          <input 
-            class="input" 
-            placeholder="请输入部门" 
-            value="{{item.department}}" 
-            bindinput="onWorkDepartmentInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">开始时间</text>
-          <input 
-            class="input" 
-            placeholder="请输入开始时间" 
-            value="{{item.startDate}}" 
-            bindinput="onWorkStartDateInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">结束时间</text>
-          <input 
-            class="input" 
-            placeholder="请输入结束时间" 
-            value="{{item.endDate}}" 
-            bindinput="onWorkEndDateInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">描述</text>
-          <input 
-            class="input" 
-            placeholder="请输入描述" 
-            value="{{item.description}}" 
-            bindinput="onWorkDescriptionInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">是否高亮</text>
-          <switch 
-            checked="{{item.highlight}}" 
-            bindchange="onWorkHighlightChange" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="remove-button" bindtap="removeWorkExperience" data-index="{{index}}">
-          <text>删除</text>
-        </view>
-      </view>
+    <view class="add-button" bindtap="addWorkExperience">+ 添加工作经历</view>
+    <view class="experience-form" wx:for="{{card.workExperience}}" wx:key="index">
+      <input class="input" placeholder="公司" value="{{item.company}}" data-index="{{index}}" data-field="company" bindinput="setWorkField" />
+      <input class="input" placeholder="职位" value="{{item.position}}" data-index="{{index}}" data-field="position" bindinput="setWorkField" />
+      <input class="input" placeholder="部门" value="{{item.department}}" data-index="{{index}}" data-field="department" bindinput="setWorkField" />
+      <input class="input" placeholder="开始时间" value="{{item.startDate}}" data-index="{{index}}" data-field="startDate" bindinput="setWorkField" />
+      <input class="input" placeholder="结束时间" value="{{item.endDate}}" data-index="{{index}}" data-field="endDate" bindinput="setWorkField" />
+      <textarea class="textarea" placeholder="描述" value="{{item.description}}" data-index="{{index}}" data-field="description" bindinput="setWorkField" />
+      <view class="remove-button" data-index="{{index}}" bindtap="removeWorkExperience">删除</view>
     </view>
   </view>
-  
-  <!-- 社会职务 -->
+
   <view class="section">
     <text class="section-title">社会职务</text>
-    <view class="add-button" bindtap="addSocialRole">
-      <text>+</text>
-      <text>添加社会职务</text>
-    </view>
-    <view class="experience-item" wx:for="{{card.socialRoles}}" wx:key="index">
-      <view class="experience-form">
-        <view class="form-item">
-          <text class="label">组织</text>
-          <input 
-            class="input" 
-            placeholder="请输入组织" 
-            value="{{item.organization}}" 
-            bindinput="onSocialOrganizationInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">职务</text>
-          <input 
-            class="input" 
-            placeholder="请输入职务" 
-            value="{{item.position}}" 
-            bindinput="onSocialPositionInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">开始年份</text>
-          <input 
-            class="input" 
-            placeholder="请输入开始年份" 
-            value="{{item.startDate}}" 
-            bindinput="onSocialStartDateInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">结束年份</text>
-          <input 
-            class="input" 
-            placeholder="请输入结束年份" 
-            value="{{item.endDate}}" 
-            bindinput="onSocialEndDateInput" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="form-item">
-          <text class="label">是否高亮</text>
-          <switch 
-            checked="{{item.highlight}}" 
-            bindchange="onSocialHighlightChange" 
-            data-index="{{index}}"
-          />
-        </view>
-        <view class="remove-button" bindtap="removeSocialRole" data-index="{{index}}">
-          <text>删除</text>
-        </view>
-      </view>
+    <view class="add-button" bindtap="addSocialPosition">+ 添加社会职务</view>
+    <view class="experience-form" wx:for="{{card.socialPositions}}" wx:key="index">
+      <input class="input" placeholder="组织" value="{{item.organization}}" data-index="{{index}}" data-field="organization" bindinput="setSocialField" />
+      <input class="input" placeholder="职位" value="{{item.position}}" data-index="{{index}}" data-field="position" bindinput="setSocialField" />
+      <input class="input" placeholder="开始时间" value="{{item.startDate}}" data-index="{{index}}" data-field="startDate" bindinput="setSocialField" />
+      <input class="input" placeholder="结束时间" value="{{item.endDate}}" data-index="{{index}}" data-field="endDate" bindinput="setSocialField" />
+      <view class="remove-button" data-index="{{index}}" bindtap="removeSocialPosition">删除</view>
     </view>
   </view>
-  
-  <!-- 技能标签 -->
+
   <view class="section">
-    <text class="section-title">技能标签</text>
-    <view class="form-item">
-      <text class="label">标签</text>
-      <input 
-        class="input" 
-        placeholder="请输入技能标签，用逗号分隔" 
-        value="{{card.skills}}" 
-        bindinput="onSkillsInput" 
-      />
-    </view>
+    <text class="section-title">其他</text>
+    <view class="form-item"><text class="label">标签</text><input class="input" value="{{card.tags}}" data-field="tags" bindinput="setField" placeholder="多个标签可用逗号隔开" /></view>
+    <textarea class="textarea block" value="{{card.remark}}" data-field="remark" bindinput="setField" placeholder="备注" />
   </view>
-  
-  <!-- 备注 -->
-  <view class="section">
-    <text class="section-title">备注</text>
-    <view class="form-item">
-      <textarea 
-        class="textarea" 
-        placeholder="请输入备注" 
-        value="{{card.note}}" 
-        bindinput="onNoteInput" 
-      />
-    </view>
-  </view>
-  
-  <!-- 公开设置 -->
-  <view class="section">
-    <text class="section-title">公开设置</text>
-    <view class="form-item">
-      <text class="label">公开名片</text>
-      <switch 
-        checked="{{card.isPublic}}" 
-        bindchange="onPublicChange" 
-      />
-    </view>
-  </view>
-  
-  <!-- 提交按钮 -->
-  <view class="submit-button" bindtap="onSubmit">
-    <text>保存名片</text>
-  </view>
+
+  <view class="submit-button" bindtap="onSubmit">保存</view>
 </view>

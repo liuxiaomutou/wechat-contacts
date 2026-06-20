@@ -1,495 +1,80 @@
 import { getCard, createCard, updateCard } from '../../utils/api';
 
+function emptyCard() {
+  return {
+    name: '', avatar: '', gender: '', company: '', position: '', jobLevel: '', industry: '', field: '',
+    phones: [''], emails: [''], wechat: '', qq: '', website: '', linkedin: '', fax: '',
+    residentialAddress: '', hometownAddress: '', birthplace: '',
+    educationBackground: [], workExperience: [], socialPositions: [], skills: [], tags: '', remark: '', isPublic: true
+  };
+}
+function arr(v, fallback = ['']) {
+  if (Array.isArray(v)) return v.length ? v : fallback;
+  if (typeof v === 'string' && v.trim()) { try { const p = JSON.parse(v); return Array.isArray(p) ? p : [v]; } catch { return [v]; } }
+  return fallback;
+}
+function normalize(card) {
+  return {
+    ...emptyCard(), ...card,
+    phones: arr(card.phones, card.phone ? [card.phone] : ['']),
+    emails: arr(card.emails, card.email ? [card.email] : ['']),
+    educationBackground: arr(card.educationBackground, []),
+    workExperience: arr(card.workExperience, []),
+    socialPositions: arr(card.socialPositions, []),
+    skills: arr(card.skills, [])
+  };
+}
+
 Page({
-  data: {
-    cardId: '',
-    libraryId: '',
-    card: {
-      name: '',
-      phone: '',
-      gender: '',
-      company: '',
-      title: '',
-      level: '',
-      industry: '',
-      field: '',
-      email: '',
-      wechat: '',
-      qq: '',
-      website: '',
-      linkedin: '',
-      fax: '',
-      residence: '',
-      hometown: '',
-      originalResidence: '',
-      education: [],
-      workExperience: [],
-      socialRoles: [],
-      skills: '',
-      note: '',
-      isPublic: true
-    },
-    genders: [
-      { value: 'male', label: '男' },
-      { value: 'female', label: '女' }
-    ]
-  },
+  data: { cardId: '', libraryId: '', card: emptyCard(), genders: [{ value: '', label: '未设置' }, { value: 'male', label: '男' }, { value: 'female', label: '女' }] },
 
   onLoad(options) {
-    const { cardId, libraryId } = options;
-    this.setData({ cardId, libraryId });
-    
-    if (cardId) {
-      this.loadCard();
-    } else {
-      // New card, initialize with default values
-      this.setData({
-        card: {
-          name: '',
-          phone: '',
-          gender: '',
-          company: '',
-          title: '',
-          level: '',
-          industry: '',
-          field: '',
-          email: '',
-          wechat: '',
-          qq: '',
-          website: '',
-          linkedin: '',
-          fax: '',
-          residence: '',
-          hometown: '',
-          originalResidence: '',
-          education: [],
-          workExperience: [],
-          socialRoles: [],
-          skills: '',
-          note: '',
-          isPublic: true
-        }
-      });
-    }
+    this.setData({ cardId: options.cardId || '', libraryId: options.libraryId || '' });
+    if (options.cardId) this.loadCard();
   },
 
   async loadCard() {
-    try {
-      const card = await getCard(this.data.cardId);
-      this.setData({ card });
-    } catch (error) {
-      console.error('Failed to load card:', error);
-      wx.showToast({
-        title: '加载失败',
-        icon: 'none'
-      });
-    }
+    try { this.setData({ card: normalize(await getCard(this.data.cardId)) }); }
+    catch (error) { wx.showToast({ title: error.message || '加载失败', icon: 'none' }); }
   },
 
-  // Basic info handlers
-  onNameInput(e) {
-    this.setData({
-      'card.name': e.detail.value
-    });
-  },
-
-  onPhoneInput(e) {
-    this.setData({
-      'card.phone': e.detail.value
-    });
-  },
-
+  setField(e) { this.setData({ [`card.${e.currentTarget.dataset.field}`]: e.detail.value }); },
+  onPublicChange(e) { this.setData({ 'card.isPublic': e.detail.value }); },
   onGenderChange(e) {
-    this.setData({
-      'card.gender': e.detail.value
-    });
+    const item = this.data.genders[e.detail.value] || this.data.genders[0];
+    this.setData({ 'card.gender': item.value });
   },
 
-  // Work info handlers
-  onCompanyInput(e) {
-    this.setData({
-      'card.company': e.detail.value
-    });
-  },
+  addPhone() { this.setData({ 'card.phones': [...this.data.card.phones, ''] }); },
+  removePhone(e) { const a = [...this.data.card.phones]; a.splice(e.currentTarget.dataset.index, 1); this.setData({ 'card.phones': a.length ? a : [''] }); },
+  onPhoneInput(e) { const a = [...this.data.card.phones]; a[e.currentTarget.dataset.index] = e.detail.value; this.setData({ 'card.phones': a }); },
+  addEmail() { this.setData({ 'card.emails': [...this.data.card.emails, ''] }); },
+  removeEmail(e) { const a = [...this.data.card.emails]; a.splice(e.currentTarget.dataset.index, 1); this.setData({ 'card.emails': a.length ? a : [''] }); },
+  onEmailInput(e) { const a = [...this.data.card.emails]; a[e.currentTarget.dataset.index] = e.detail.value; this.setData({ 'card.emails': a }); },
 
-  onTitleInput(e) {
-    this.setData({
-      'card.title': e.detail.value
-    });
-  },
+  addEducation() { this.setData({ 'card.educationBackground': [...this.data.card.educationBackground, { school: '', major: '', degree: '', startDate: '', endDate: '' }] }); },
+  removeEducation(e) { const a = [...this.data.card.educationBackground]; a.splice(e.currentTarget.dataset.index, 1); this.setData({ 'card.educationBackground': a }); },
+  setEducationField(e) { const a = [...this.data.card.educationBackground]; a[e.currentTarget.dataset.index][e.currentTarget.dataset.field] = e.detail.value; this.setData({ 'card.educationBackground': a }); },
 
-  onLevelInput(e) {
-    this.setData({
-      'card.level': e.detail.value
-    });
-  },
+  addWorkExperience() { this.setData({ 'card.workExperience': [...this.data.card.workExperience, { company: '', position: '', department: '', startDate: '', endDate: '', description: '' }] }); },
+  removeWorkExperience(e) { const a = [...this.data.card.workExperience]; a.splice(e.currentTarget.dataset.index, 1); this.setData({ 'card.workExperience': a }); },
+  setWorkField(e) { const a = [...this.data.card.workExperience]; a[e.currentTarget.dataset.index][e.currentTarget.dataset.field] = e.detail.value; this.setData({ 'card.workExperience': a }); },
 
-  onIndustryInput(e) {
-    this.setData({
-      'card.industry': e.detail.value
-    });
-  },
-
-  onFieldInput(e) {
-    this.setData({
-      'card.field': e.detail.value
-    });
-  },
-
-  // Contact info handlers
-  onEmailInput(e) {
-    this.setData({
-      'card.email': e.detail.value
-    });
-  },
-
-  onWechatInput(e) {
-    this.setData({
-      'card.wechat': e.detail.value
-    });
-  },
-
-  onQqInput(e) {
-    this.setData({
-      'card.qq': e.detail.value
-    });
-  },
-
-  onWebsiteInput(e) {
-    this.setData({
-      'card.website': e.detail.value
-    });
-  },
-
-  onLinkedinInput(e) {
-    this.setData({
-      'card.linkedin': e.detail.value
-    });
-  },
-
-  onFaxInput(e) {
-    this.setData({
-      'card.fax': e.detail.value
-    });
-  },
-
-  // Personal info handlers
-  onResidenceInput(e) {
-    this.setData({
-      'card.residence': e.detail.value
-    });
-  },
-
-  onHometownInput(e) {
-    this.setData({
-      'card.hometown': e.detail.value
-    });
-  },
-
-  onOriginalResidenceInput(e) {
-    this.setData({
-      'card.originalResidence': e.detail.value
-    });
-  },
-
-  // Education handlers
-  addEducation() {
-    const education = [...this.data.card.education];
-    education.push({
-      school: '',
-      major: '',
-      degree: '',
-      startDate: '',
-      endDate: '',
-      highlight: false
-    });
-    this.setData({
-      'card.education': education
-    });
-  },
-
-  removeEducation(e) {
-    const index = e.currentTarget.dataset.index;
-    const education = [...this.data.card.education];
-    education.splice(index, 1);
-    this.setData({
-      'card.education': education
-    });
-  },
-
-  onEducationSchoolInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const education = [...this.data.card.education];
-    education[index].school = e.detail.value;
-    this.setData({
-      'card.education': education
-    });
-  },
-
-  onEducationMajorInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const education = [...this.data.card.education];
-    education[index].major = e.detail.value;
-    this.setData({
-      'card.education': education
-    });
-  },
-
-  onEducationDegreeInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const education = [...this.data.card.education];
-    education[index].degree = e.detail.value;
-    this.setData({
-      'card.education': education
-    });
-  },
-
-  onEducationStartDateInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const education = [...this.data.card.education];
-    education[index].startDate = e.detail.value;
-    this.setData({
-      'card.education': education
-    });
-  },
-
-  onEducationEndDateInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const education = [...this.data.card.education];
-    education[index].endDate = e.detail.value;
-    this.setData({
-      'card.education': education
-    });
-  },
-
-  onEducationHighlightChange(e) {
-    const index = e.currentTarget.dataset.index;
-    const education = [...this.data.card.education];
-    education[index].highlight = e.detail.value;
-    this.setData({
-      'card.education': education
-    });
-  },
-
-  // Work experience handlers
-  addWorkExperience() {
-    const workExperience = [...this.data.card.workExperience];
-    workExperience.push({
-      company: '',
-      position: '',
-      department: '',
-      startDate: '',
-      endDate: '',
-      description: '',
-      highlight: false
-    });
-    this.setData({
-      'card.workExperience': workExperience
-    });
-  },
-
-  removeWorkExperience(e) {
-    const index = e.currentTarget.dataset.index;
-    const workExperience = [...this.data.card.workExperience];
-    workExperience.splice(index, 1);
-    this.setData({
-      'card.workExperience': workExperience
-    });
-  },
-
-  onWorkCompanyInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const workExperience = [...this.data.card.workExperience];
-    workExperience[index].company = e.detail.value;
-    this.setData({
-      'card.workExperience': workExperience
-    });
-  },
-
-  onWorkPositionInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const workExperience = [...this.data.card.workExperience];
-    workExperience[index].position = e.detail.value;
-    this.setData({
-      'card.workExperience': workExperience
-    });
-  },
-
-  onWorkDepartmentInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const workExperience = [...this.data.card.workExperience];
-    workExperience[index].department = e.detail.value;
-    this.setData({
-      'card.workExperience': workExperience
-    });
-  },
-
-  onWorkStartDateInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const workExperience = [...this.data.card.workExperience];
-    workExperience[index].startDate = e.detail.value;
-    this.setData({
-      'card.workExperience': workExperience
-    });
-  },
-
-  onWorkEndDateInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const workExperience = [...this.data.card.workExperience];
-    workExperience[index].endDate = e.detail.value;
-    this.setData({
-      'card.workExperience': workExperience
-    });
-  },
-
-  onWorkDescriptionInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const workExperience = [...this.data.card.workExperience];
-    workExperience[index].description = e.detail.value;
-    this.setData({
-      'card.workExperience': workExperience
-    });
-  },
-
-  onWorkHighlightChange(e) {
-    const index = e.currentTarget.dataset.index;
-    const workExperience = [...this.data.card.workExperience];
-    workExperience[index].highlight = e.detail.value;
-    this.setData({
-      'card.workExperience': workExperience
-    });
-  },
-
-  // Social role handlers
-  addSocialRole() {
-    const socialRoles = [...this.data.card.socialRoles];
-    socialRoles.push({
-      organization: '',
-      position: '',
-      startDate: '',
-      endDate: '',
-      highlight: false
-    });
-    this.setData({
-      'card.socialRoles': socialRoles
-    });
-  },
-
-  removeSocialRole(e) {
-    const index = e.currentTarget.dataset.index;
-    const socialRoles = [...this.data.card.socialRoles];
-    socialRoles.splice(index, 1);
-    this.setData({
-      'card.socialRoles': socialRoles
-    });
-  },
-
-  onSocialOrganizationInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const socialRoles = [...this.data.card.socialRoles];
-    socialRoles[index].organization = e.detail.value;
-    this.setData({
-      'card.socialRoles': socialRoles
-    });
-  },
-
-  onSocialPositionInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const socialRoles = [...this.data.card.socialRoles];
-    socialRoles[index].position = e.detail.value;
-    this.setData({
-      'card.socialRoles': socialRoles
-    });
-  },
-
-  onSocialStartDateInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const socialRoles = [...this.data.card.socialRoles];
-    socialRoles[index].startDate = e.detail.value;
-    this.setData({
-      'card.socialRoles': socialRoles
-    });
-  },
-
-  onSocialEndDateInput(e) {
-    const index = e.currentTarget.dataset.index;
-    const socialRoles = [...this.data.card.socialRoles];
-    socialRoles[index].endDate = e.detail.value;
-    this.setData({
-      'card.socialRoles': socialRoles
-    });
-  },
-
-  onSocialHighlightChange(e) {
-    const index = e.currentTarget.dataset.index;
-    const socialRoles = [...this.data.card.socialRoles];
-    socialRoles[index].highlight = e.detail.value;
-    this.setData({
-      'card.socialRoles': socialRoles
-    });
-  },
-
-  // Skills and note handlers
-  onSkillsInput(e) {
-    this.setData({
-      'card.skills': e.detail.value
-    });
-  },
-
-  onNoteInput(e) {
-    this.setData({
-      'card.note': e.detail.value
-    });
-  },
-
-  onPublicChange(e) {
-    this.setData({
-      'card.isPublic': e.detail.value
-    });
-  },
+  addSocialPosition() { this.setData({ 'card.socialPositions': [...this.data.card.socialPositions, { organization: '', position: '', startDate: '', endDate: '' }] }); },
+  removeSocialPosition(e) { const a = [...this.data.card.socialPositions]; a.splice(e.currentTarget.dataset.index, 1); this.setData({ 'card.socialPositions': a }); },
+  setSocialField(e) { const a = [...this.data.card.socialPositions]; a[e.currentTarget.dataset.index][e.currentTarget.dataset.field] = e.detail.value; this.setData({ 'card.socialPositions': a }); },
 
   async onSubmit() {
-    // Validate required fields
-    if (!this.data.card.name || !this.data.card.phone) {
-      wx.showToast({
-        title: '姓名和手机号为必填项',
-        icon: 'none'
-      });
-      return;
-    }
-    
-    // Prepare data for submission
-    const cardData = { ...this.data.card };
-    
-    // Serialize arrays to JSON strings
-    cardData.education = JSON.stringify(cardData.education);
-    cardData.workExperience = JSON.stringify(cardData.workExperience);
-    cardData.socialRoles = JSON.stringify(cardData.socialRoles);
-    
+    const c = this.data.card;
+    const phones = c.phones.map(x => x.trim()).filter(Boolean);
+    const emails = c.emails.map(x => x.trim()).filter(Boolean);
+    if (!c.name) return wx.showToast({ title: '姓名必填', icon: 'none' });
+    const data = { ...c, phones, phone: phones[0] || '', emails, email: emails[0] || '' };
+    if (!this.data.cardId) data.libraryId = this.data.libraryId;
     try {
-      if (this.data.cardId) {
-        // Update existing card
-        await updateCard(this.data.cardId, cardData);
-        wx.showToast({
-          title: '更新成功'
-        });
-      } else {
-        // Create new card
-        cardData.libraryId = this.data.libraryId;
-        await createCard(cardData);
-        wx.showToast({
-          title: '创建成功'
-        });
-      }
-      
-      // Navigate back
-      wx.navigateBack();
-    } catch (error) {
-      console.error('Failed to save card:', error);
-      wx.showToast({
-        title: '保存失败',
-        icon: 'none'
-      });
-    }
+      if (this.data.cardId) await updateCard(this.data.cardId, data); else await createCard(data);
+      wx.showToast({ title: '已保存' });
+      setTimeout(() => wx.navigateBack(), 500);
+    } catch (error) { wx.showToast({ title: error.message || '保存失败', icon: 'none' }); }
   }
 });
