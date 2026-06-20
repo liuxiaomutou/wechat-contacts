@@ -1,0 +1,25 @@
+<view class="page">
+  <view class="login-box">
+    <view class="logo">📇</view>
+    <view class="title">名片库</view>
+    <view class="subtitle">Business Card Library</view>
+
+    <view class="tab-bar" wx:if="{{!showLogin}}">
+      <view class="tab-item active">登录</view>
+      <view class="tab-item" bindtap="switchTab">注册</view>
+    </view>
+    <view class="tab-bar" wx:if="{{showLogin}}">
+      <view class="tab-item" bindtap="switchTab">登录</view>
+      <view class="tab-item active">注册</view>
+    </view>
+
+    <input class="input" type="text" placeholder="用户名" value="{{username}}" bindinput="onInput" data-field="username" />
+    <input class="input" type="password" placeholder="密码" value="{{password}}" bindinput="onInput" data-field="password" />
+    <input class="input" type="text" placeholder="昵称（选填）" value="{{nickname}}" bindinput="onInput" data-field="nickname" wx:if="{{showLogin}}" />
+
+    <button class="btn-primary" bindtap="handleSubmit">{{showLogin ? '注册' : '登录'}}</button>
+    <view class="switch" bindtap="switchTab">
+      {{showLogin ? '已有账号？去登录' : '没有账号？去注册'}}
+    </view>
+  </view>
+</view>

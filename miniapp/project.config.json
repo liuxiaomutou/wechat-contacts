@@ -42,7 +42,7 @@
   "compileType": "miniprogram",
   "libVersion": "3.7.5",
   "appid": "your-app-id-here",
-  "projectname": "contact-book",
+  "projectname": "wechat-contacts",
   "condition": {},
   "editorSetting": {
     "tabIndent": "insertSpaces",

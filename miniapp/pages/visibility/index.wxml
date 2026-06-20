@@ -1,0 +1,27 @@
+<!-- 可见性设置页 -->
+<view class="container">
+  <view class="header">
+    <text class="title">设置名片可见性</text>
+  </view>
+  
+  <scroll-view class="visibility-scroll" scroll-y="true">
+    <view class="visibility-item" wx:for="{{visibilityFields}}" wx:key="index">
+      <view class="field-name">{{item.name}}</view>
+      <view class="visibility-picker">
+        <picker 
+          mode="selector" 
+          range="{{item.options}}" 
+          value="{{item.value}}" 
+          bindchange="onVisibilityChange" 
+          data-index="{{index}}"
+        >
+          <text>{{item.options[item.value]}}</text>
+        </picker>
+      </view>
+    </view>
+  </scroll-view>
+  
+  <view class="submit-button" bindtap="onSubmit">
+    <text>保存设置</text>
+  </view>
+</view>

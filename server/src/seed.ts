@@ -1,76 +1,116 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 开始插入种子数据...');
+  console.log('🌱 开始播种种子数据...');
 
-  // 清空旧数据
-  await prisma.contactGroup.deleteMany();
-  await prisma.contact.deleteMany();
-  await prisma.group.deleteMany();
+  // 创建用户
+  const adminPassword = await bcrypt.hash('admin123', 10);
+  const testPassword = await bcrypt.hash('test123', 10);
 
-  // 创建分组
-  const groups = await Promise.all([
-    prisma.group.create({ data: { name: '家人', sort: 1 } }),
-    prisma.group.create({ data: { name: '同事', sort: 2 } }),
-    prisma.group.create({ data: { name: '朋友', sort: 3 } }),
-    prisma.group.create({ data: { name: '客户', sort: 4 } }),
-  ]);
-  console.log(`  ✅ 创建了 ${groups.length} 个分组`);
+  const admin = await prisma.user.upsert({
+    where: { username: 'admin' },
+    update: {},
+    create: {
+      username: 'admin',
+      password: adminPassword,
+      nickname: '管理员',
+      role: 'super_admin',
+    },
+  });
+  console.log(`  ✅ 管理员: admin / admin123 (role: super_admin)`);
 
-  // 创建联系人
-  const contactsData = [
-    { name: '张三', phone: '13800138001', email: 'zhangsan@example.com', company: '阿里巴巴', position: '技术总监', favorite: true },
-    { name: '李四', phone: '13800138002', email: 'lisi@example.com', company: '腾讯', position: '产品经理' },
-    { name: '王五', phone: '13800138003', email: 'wangwu@example.com', company: '字节跳动', position: '前端工程师' },
-    { name: '赵六', phone: '13800138004', email: 'zhaoliu@example.com', company: '美团', position: '后端开发' },
-    { name: '妈妈', phone: '13900000001', email: undefined, company: undefined, position: undefined, favorite: true },
-    { name: '爸爸', phone: '13900000002', email: undefined, company: undefined, position: undefined },
-    { name: '老张', phone: '13600000001', email: 'oldzhang@example.com', company: '自由职业', position: undefined },
-    { name: '刘姐', phone: '13700000001', email: 'liujie@example.com', company: '小木科技', position: '运营总监' },
+  const test = await prisma.user.upsert({
+    where: { username: 'test' },
+    update: {},
+    create: {
+      username: 'test',
+      password: testPassword,
+      nickname: '测试用户',
+      role: 'user',
+    },
+  });
+  console.log(`  ✅ 测试用户: test / test123 (role: user)`);
+
+  // 创建名片库
+  const library = await prisma.cardLibrary.upsert({
+    where: { ownerId_name: { ownerId: admin.id, name: '默认名片库' } },
+    update: {},
+    create: {
+      name: '默认名片库',
+      description: '个人通讯录名片库',
+      ownerId: admin.id,
+    },
+  });
+  console.log(`  ✅ 名片库: ${library.name} (ID: ${library.id})`);
+
+  // 添加 test 到库
+  await prisma.libraryMember.upsert({
+    where: { libraryId_userId: { libraryId: library.id, userId: test.id } },
+    update: {},
+    create: { libraryId: library.id, userId: test.id, role: 'editor' },
+  });
+  console.log(`  ✅ test 已加入库，角色: editor`);
+
+  // 创建测试名片
+  const cards = [
+    {
+      name: '张三',
+      phone: '13800138001',
+      email: 'zhangsan@example.com',
+      company: '腾讯科技',
+      position: '技术总监',
+      jobLevel: '总监',
+      industry: '互联网',
+      field: '技术研发',
+      gender: '男',
+      wechat: 'zhangsan_wx',
+      tags: '技术,管理',
+      remark: '前阿里同事',
+      libraryId: library.id,
+      ownerId: admin.id,
+    },
+    {
+      name: '张三',
+      phone: '13800138001',
+      email: 'zhangsan@qq.com',
+      company: '腾讯科技',
+      position: '高级工程师',
+      jobLevel: '高级',
+      remark: '手机号相同的重复联系人',
+      libraryId: library.id,
+      ownerId: admin.id,
+    },
+    {
+      name: '李四',
+      phone: '13900139002',
+      company: '阿里巴巴',
+      position: '产品经理',
+      industry: '互联网',
+      field: '产品',
+      wechat: 'lisi_wx',
+      tags: '产品,运营',
+      remark: '合作伙伴',
+      libraryId: library.id,
+      ownerId: test.id,
+    },
   ];
 
-  for (const data of contactsData) {
-    await prisma.contact.create({ data });
+  for (const cardData of cards) {
+    await prisma.card.create({ data: cardData });
   }
-  console.log(`  ✅ 创建了 ${contactsData.length} 个联系人`);
+  console.log(`  ✅ ${cards.length} 张测试名片已创建`);
 
-  // 关联联系人到分组
-  const allContacts = await prisma.contact.findMany();
-  const allGroups = await prisma.group.findMany();
-
-  // 给联系人分配分组
-  const groupAssignments = [
-    { contactName: '妈妈', groupName: '家人' },
-    { contactName: '爸爸', groupName: '家人' },
-    { contactName: '张三', groupName: '同事' },
-    { contactName: '李四', groupName: '同事' },
-    { contactName: '王五', groupName: '同事' },
-    { contactName: '赵六', groupName: '同事' },
-    { contactName: '老张', groupName: '朋友' },
-    { contactName: '刘姐', groupName: '客户' },
-    { contactName: '张三', groupName: '朋友' },
-    { contactName: '赵六', groupName: '朋友' },
-  ];
-
-  for (const { contactName, groupName } of groupAssignments) {
-    const contact = allContacts.find(c => c.name === contactName);
-    const group = allGroups.find(g => g.name === groupName);
-    if (contact && group) {
-      await prisma.contactGroup.create({
-        data: { contactId: contact.id, groupId: group.id }
-      });
-    }
-  }
-  console.log(`  ✅ 关联了 ${groupAssignments.length} 条联系人-分组关系`);
-
-  console.log('🎉 种子数据插入完成！');
+  console.log('\n🎉 种子数据播种完成！');
+  console.log('   管理员登录: admin / admin123');
+  console.log('   测试用户: test / test123');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ 种子数据插入失败:', e);
+    console.error('❌ 播种失败:', e);
     process.exit(1);
   })
   .finally(async () => {

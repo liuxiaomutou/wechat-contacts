@@ -1,50 +1,49 @@
 /**
  * API 请求封装
- * 统一处理请求/响应格式、错误处理
  */
-
 const app = getApp();
 
-/**
- * 基础请求方法
- */
 function request(url, options = {}) {
   const baseUrl = app.globalData.baseUrl;
-  
+
   return new Promise((resolve, reject) => {
+    const header = {
+      'Content-Type': 'application/json',
+      ...options.header,
+    };
+
+    // 自动添加 token
+    const token = wx.getStorageSync('token');
+    if (token) {
+      header['Authorization'] = 'Bearer ' + token;
+    }
+
     wx.request({
       url: `${baseUrl}${url}`,
       method: options.method || 'GET',
       data: options.data,
-      header: {
-        'Content-Type': 'application/json',
-        ...options.header
-      },
+      header,
       success(res) {
-        // 2xx 成功
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res.data);
-        } else if (res.statusCode === 404) {
-          reject({ code: 404, message: '请求的资源不存在' });
-        } else if (res.statusCode === 409) {
-          reject({ code: 409, message: res.data?.error || '数据冲突' });
+        } else if (res.statusCode === 401) {
+          wx.removeStorageSync('token');
+          wx.removeStorageSync('user');
+          wx.reLaunch({ url: '/pages/login/index' });
+          reject({ code: 401, message: '未登录' });
         } else {
           reject({ code: res.statusCode, message: res.data?.error || '请求失败' });
         }
       },
       fail(err) {
-        // 网络错误
         console.error('网络请求失败:', err);
-        wx.showToast({ title: '网络异常，请检查服务器', icon: 'none' });
+        wx.showToast({ title: '网络异常', icon: 'none' });
         reject({ code: -1, message: '网络连接失败' });
-      }
+      },
     });
   });
 }
 
-/**
- * 构建查询字符串
- */
 function buildQuery(params) {
   const parts = [];
   for (const [key, value] of Object.entries(params)) {
@@ -55,76 +54,88 @@ function buildQuery(params) {
   return parts.length ? `?${parts.join('&')}` : '';
 }
 
-/**
- * ============ 联系人 API ============
- */
-
-// 获取联系人列表
-export function getContacts(params = {}) {
-  return request(`/contacts${buildQuery(params)}`);
+// ======== 认证 ========
+export function login(data) {
+  return request('/auth/login', { method: 'POST', data });
+}
+export function register(data) {
+  return request('/auth/register', { method: 'POST', data });
+}
+export function getMe() {
+  return request('/auth/me');
+}
+export function updateMe(data) {
+  return request('/auth/me', { method: 'PUT', data });
 }
 
-// 获取联系人详情
-export function getContact(id) {
-  return request(`/contacts/${id}`);
+// ======== 名片库 ========
+export function getLibraries() {
+  return request('/libraries');
+}
+export function createLibrary(data) {
+  return request('/libraries', { method: 'POST', data });
+}
+export function getLibrary(id) {
+  return request(`/libraries/${id}`);
+}
+export function updateLibrary(id, data) {
+  return request(`/libraries/${id}`, { method: 'PUT', data });
+}
+export function deleteLibrary(id) {
+  return request(`/libraries/${id}`, { method: 'DELETE' });
+}
+export function getMembers(libraryId) {
+  return request(`/libraries/${libraryId}/members`);
+}
+export function addMember(libraryId, data) {
+  return request(`/libraries/${libraryId}/members`, { method: 'POST', data });
+}
+export function updateMember(libraryId, memberId, data) {
+  return request(`/libraries/${libraryId}/members/${memberId}`, { method: 'PUT', data });
+}
+export function deleteMember(libraryId, memberId) {
+  return request(`/libraries/${libraryId}/members/${memberId}`, { method: 'DELETE' });
 }
 
-// 新建联系人
-export function createContact(data) {
-  return request('/contacts', {
-    method: 'POST',
-    data
-  });
+// ======== 名片 ========
+export function getCards(params = {}) {
+  return request(`/cards${buildQuery(params)}`);
+}
+export function getCard(id) {
+  return request(`/cards/${id}`);
+}
+export function createCard(data) {
+  return request('/cards', { method: 'POST', data });
+}
+export function updateCard(id, data) {
+  return request(`/cards/${id}`, { method: 'PUT', data });
+}
+export function deleteCard(id) {
+  return request(`/cards/${id}`, { method: 'DELETE' });
+}
+export function getCardVisibility(id) {
+  return request(`/cards/${id}/visibility`);
+}
+export function updateCardVisibility(id, data) {
+  return request(`/cards/${id}/visibility`, { method: 'PUT', data });
 }
 
-// 更新联系人
-export function updateContact(id, data) {
-  return request(`/contacts/${id}`, {
-    method: 'PUT',
-    data
-  });
+// ======== 查重 ========
+export function detectDuplicates(libraryId) {
+  return request(`/duplicates/${libraryId}/detect`, { method: 'POST' });
 }
-
-// 删除联系人
-export function deleteContact(id) {
-  return request(`/contacts/${id}`, {
-    method: 'DELETE'
-  });
+export function getDuplicates(libraryId, params = {}) {
+  return request(`/duplicates/${libraryId}${buildQuery(params)}`);
 }
-
-/**
- * ============ 分组 API ============
- */
-
-// 获取全部分组
-export function getGroups() {
-  return request('/groups');
+export function getDuplicateGroup(libraryId, groupId) {
+  return request(`/duplicates/${libraryId}/groups/${groupId}`);
 }
-
-// 创建分组
-export function createGroup(data) {
-  return request('/groups', {
-    method: 'POST',
-    data
-  });
+export function mergeDuplicates(data) {
+  return request('/duplicates/merge', { method: 'POST', data });
 }
-
-// 更新分组
-export function updateGroup(id, data) {
-  return request(`/groups/${id}`, {
-    method: 'PUT',
-    data
-  });
+export function dismissDuplicates(libraryId, groupId) {
+  return request(`/duplicates/${libraryId}/dismiss/${groupId}`, { method: 'POST' });
 }
-
-// 删除分组
-export function deleteGroup(id) {
-  return request(`/groups/${id}`, {
-    method: 'DELETE'
-  });
-}
-
-// 获取分组下的联系人
-export function getGroupContacts(id) {
-  return request(`/groups/${id}/contacts`);
+export function getDuplicateStats(libraryId) {
+  return request(`/duplicates/${libraryId}/stats`);
 }

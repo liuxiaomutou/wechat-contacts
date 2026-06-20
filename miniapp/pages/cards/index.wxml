@@ -1,0 +1,38 @@
+<!-- 名片列表页 -->
+<view class="container">
+  <view class="header">
+    <text class="library-name">{{libraryName}}</text>
+    <input 
+      class="search-input" 
+      placeholder="搜索名片..." 
+      value="{{searchKeyword}}" 
+      bindinput="onSearchInput" 
+    />
+    <view class="add-button" bindtap="onAddCard">
+      <text>+</text>
+    </view>
+  </view>
+  
+  <scroll-view class="cards-scroll" scroll-y="true">
+    <view class="empty-state" wx:if="{{cards.length === 0}}">
+      <text>暂无名片</text>
+    </view>
+    
+    <view 
+      class="card-item" 
+      wx:for="{{cards}}" 
+      wx:key="id" 
+      bindtap="onCardTap" 
+      bindlongpress="onLongPressCard" 
+      data-id="{{item.id}}"
+    >
+      <view class="avatar">{{item.name.charAt(0)}}</view>
+      <view class="card-info">
+        <text class="name">{{item.name}}</text>
+        <text class="company">{{item.company}}</text>
+        <text class="title">{{item.title}}</text>
+        <text class="phone">{{item.phone}}</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>

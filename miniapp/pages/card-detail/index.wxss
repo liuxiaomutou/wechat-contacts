@@ -1,0 +1,124 @@
+.container {
+  background-color: #f5f5f5;
+  padding-bottom: 100rpx;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 40rpx 30rpx;
+  background-color: #ffffff;
+  margin-bottom: 30rpx;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background-color: #07c160;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60rpx;
+  font-weight: bold;
+  margin-right: 30rpx;
+}
+
+.info {
+  flex: 1;
+}
+
+.name {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.company-title {
+  font-size: 30rpx;
+  color: #666;
+}
+
+.section {
+  background-color: #ffffff;
+  margin: 0 30rpx 30rpx;
+  padding: 30rpx;
+  border-radius: 16rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-bottom: 10rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.info-item {
+  display: flex;
+  margin-bottom: 20rpx;
+}
+
+.label {
+  font-size: 28rpx;
+  color: #555;
+  width: 120rpx;
+}
+
+.value {
+  font-size: 28rpx;
+  color: #333;
+  flex: 1;
+}
+
+.value:hover {
+  color: #07c160;
+}
+
+.experience-item {
+  margin-bottom: 20rpx;
+}
+
+.experience-text {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 5rpx;
+}
+
+.experience-date {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 5rpx;
+}
+
+.experience-desc {
+  font-size: 26rpx;
+  color: #888;
+  margin-left: 20rpx;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 40rpx;
+}
+
+.action-button {
+  width: 200rpx;
+  height: 80rpx;
+  background-color: #ffffff;
+  border: 1rpx solid #ddd;
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  color: #333;
+}
+
+.action-button text {
+  color: #07c160;
+}

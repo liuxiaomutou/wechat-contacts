@@ -1,0 +1,32 @@
+<!-- 成员管理页 -->
+<view class="container">
+  <view class="header">
+    <text class="library-name">{{libraryName}}</text>
+    <view class="add-button" bindtap="onAddMember">
+      <text>+</text>
+    </view>
+  </view>
+  
+  <scroll-view class="members-scroll" scroll-y="true">
+    <view class="empty-state" wx:if="{{members.length === 0}}">
+      <text>暂无成员</text>
+    </view>
+    
+    <view 
+      class="member-item" 
+      wx:for="{{members}}" 
+      wx:key="id" 
+      bindtap="onMemberTap" 
+      bindlongpress="onLongPressMember" 
+      data-id="{{item.id}}"
+    >
+      <view class="member-info">
+        <text class="username">{{item.username}}</text>
+        <text class="nickname">{{item.nickname}}</text>
+      </view>
+      <view class="role-tag" style="background-color: {{item.role === 'admin' ? '#ff6b6b' : item.role === 'manager' ? '#4ecdc4' : item.role === 'editor' ? '#45b7d1' : '#95e1d3'}}">
+        {{item.role === 'admin' ? '管理员' : item.role === 'manager' ? '经理' : item.role === 'editor' ? '编辑' : '查看者'}}
+      </view>
+    </view>
+  </scroll-view>
+</view>

@@ -1,14 +1,17 @@
 {
   "pages": [
+    "pages/login/index",
     "pages/index/index",
-    "pages/contact-detail/index",
-    "pages/contact-edit/index",
-    "pages/groups/index",
-    "pages/search/index"
+    "pages/cards/index",
+    "pages/card-detail/index",
+    "pages/card-edit/index",
+    "pages/profile/index",
+    "pages/members/index",
+    "pages/visibility/index"
   ],
   "window": {
     "navigationBarBackgroundColor": "#07c160",
-    "navigationBarTitleText": "通讯录",
+    "navigationBarTitleText": "名片库",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#f5f5f5",
     "backgroundTextStyle": "dark"
@@ -21,15 +24,15 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "联系人",
-        "iconPath": "images/contacts.png",
-        "selectedIconPath": "images/contacts-active.png"
+        "text": "名片库",
+        "iconPath": "images/lib.png",
+        "selectedIconPath": "images/lib-active.png"
       },
       {
-        "pagePath": "pages/groups/index",
-        "text": "分组",
-        "iconPath": "images/groups.png",
-        "selectedIconPath": "images/groups-active.png"
+        "pagePath": "pages/profile/index",
+        "text": "我的",
+        "iconPath": "images/me.png",
+        "selectedIconPath": "images/me-active.png"
       }
     ]
   },

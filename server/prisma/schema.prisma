@@ -7,36 +7,179 @@ datasource db {
   url      = "file:./dev.db"
 }
 
-model Contact {
-  id        Int       @id @default(autoincrement())
-  name      String    // 姓名
-  phone     String?   // 手机号
-  email     String?   // 邮箱
-  company   String?   // 公司
-  position  String?   // 职位
-  remark    String?   // 备注
-  avatar    String?   // 头像URL
-  favorite  Boolean   @default(false) // 是否收藏
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+// ===== 用户 =====
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String               // bcrypt 哈希
+  nickname  String?
+  avatar    String?
+  phone     String?
+  role      String   @default("user") // super_admin | library_admin | user
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  groups ContactGroup[]
+  ownedLibraries    CardLibrary[]
+  libraryMemberships LibraryMember[]
+  cards             Card[]
+  mergeLogs         MergeLog[]
 }
 
+// ===== 名片库 =====
+model CardLibrary {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  avatar      String?
+  ownerId     Int
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  cards     Card[]
+  groups    Group[]
+  members   LibraryMember[]
+  dupGroups DuplicateGroup[]
+
+  @@unique([ownerId, name])
+}
+
+// ===== 库成员权限 =====
+model LibraryMember {
+  id        Int         @id @default(autoincrement())
+  libraryId Int
+  library   CardLibrary @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String      @default("viewer") // admin | manager | editor | viewer
+  createdAt DateTime    @default(now())
+
+  @@unique([libraryId, userId])
+}
+
+// ===== 名片（扩展字段） =====
+model Card {
+  id        Int      @id @default(autoincrement())
+  libraryId Int
+  library   CardLibrary @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+  ownerId   Int
+  owner     User     @relation(fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // === 基本信息（必填） ===
+  name  String  // 姓名
+  phone String  // 手机号（必填）
+
+  // === 扩展信息（选填） ===
+  email              String?
+  company            String?  // 公司
+  position           String?  // 职位
+  jobLevel           String?  // 级别（总监/经理/主管等）
+  industry           String?  // 行业
+  field              String?  // 领域（技术/市场/销售等）
+  gender             String?  // 性别
+  residentialAddress String?  // 住宅地址
+  hometownAddress    String?  // 老家地址
+  birthplace         String?  // 籍贯
+  wechat             String?  // 微信
+  qq                 String?  // QQ
+  website            String?  // 个人网站
+  linkedin           String?  // LinkedIn
+  fax                String?  // 传真
+
+  // === 复杂字段（JSON 存储） ===
+  educationBackground String? // JSON: [{school, major, degree, startDate, endDate, isHighlight}]
+  workExperience     String? // JSON: [{company, position, department, startDate, endDate, description, isHighlight}]
+  socialPositions    String? // JSON: [{organization, position, startYear, endYear, isHighlight}]
+  skills             String? // JSON: ["skill1","skill2"]
+
+  // === 其他 ===
+  tags     String?  // 逗号分隔标签
+  remark   String?  // 备注
+  avatar   String?  // 头像 URL
+  isPublic Boolean @default(true) // 是否公开可见（库内）
+
+  // === 分组关联 ===
+  groups CardGroup[]
+  // === 字段可见性 ===
+  fieldVisibilities CardFieldVisibility[]
+  // === 查重成员 ===
+  dupMembers DuplicateMember[]
+  // === 合并关联 ===
+  mergeLogsAsSource MergeLog[] @relation("SourceCard")
+  mergeLogsAsTarget MergeLog[] @relation("TargetCard")
+}
+
+// ===== 字段可见性控制 =====
+model CardFieldVisibility {
+  id        Int     @id @default(autoincrement())
+  cardId    Int
+  card      Card    @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  fieldName String  // 字段名，如 "phone", "email", "residentialAddress"
+  visibility String @default("public") // public | hidden | admin_only
+
+  @@unique([cardId, fieldName])
+}
+
+// ===== 分组 =====
 model Group {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique // 分组名称
-  sort      Int       @default(0) // 排序
-  createdAt DateTime  @default(now())
+  id        Int      @id @default(autoincrement())
+  name      String
+  sort      Int      @default(0)
+  libraryId Int
+  library   CardLibrary @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
-  contacts ContactGroup[]
+  cards CardGroup[]
+
+  @@unique([libraryId, name])
 }
 
-model ContactGroup {
-  contactId Int
-  groupId   Int
-  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  group     Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+// ===== 名片-分组关联 =====
+model CardGroup {
+  cardId  Int
+  groupId Int
+  card    Card  @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
-  @@id([contactId, groupId])
+  @@id([cardId, groupId])
+}
+
+// ===== 查重分组 =====
+model DuplicateGroup {
+  id        Int         @id @default(autoincrement())
+  libraryId Int
+  library   CardLibrary @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+  status    String      @default("open") // open | merged | dismissed
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  members DuplicateMember[]
+}
+
+// ===== 查重成员 =====
+model DuplicateMember {
+  id         Int            @id @default(autoincrement())
+  groupId    Int
+  group      DuplicateGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  cardId     Int
+  card       Card           @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  similarity Float          // 相似度 0-1
+
+  @@unique([groupId, cardId])
+}
+
+// ===== 合并日志 =====
+model MergeLog {
+  id          Int      @id @default(autoincrement())
+  sourceCardId Int
+  targetCardId Int
+  mergedFields String?  // JSON: 合并的字段列表
+  operatorId  Int
+  operator    User    @relation(fields: [operatorId], references: [id])
+  createdAt   DateTime @default(now())
+
+  sourceCard Card @relation("SourceCard", fields: [sourceCardId], references: [id])
+  targetCard Card @relation("TargetCard", fields: [targetCardId], references: [id])
 }
