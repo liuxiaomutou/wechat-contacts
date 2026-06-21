@@ -88,6 +88,20 @@ export function uploadImage(filePath) {
   });
 }
 
+// ======== 生日提醒 ========
+export function getBirthdayReminderSettings() {
+  return request('/reminders/birthday/settings');
+}
+export function updateBirthdayReminderSettings(data) {
+  return request('/reminders/birthday/settings', { method: 'PUT', data });
+}
+export function bindWechatForReminders(code) {
+  return request('/reminders/wechat/bind', { method: 'POST', data: { code } });
+}
+export function getBirthdayReminderLogs() {
+  return request('/reminders/birthday/logs');
+}
+
 // ======== 名片库 ======
 export function getLibraries() {
   return request('/libraries');

@@ -15,6 +15,7 @@ model User {
   nickname  String?
   avatar    String?
   phone     String?
+  wxOpenid  String?  @unique
   role      String   @default("user") // super_admin | library_admin | user
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -23,6 +24,8 @@ model User {
   libraryMemberships LibraryMember[]
   cards             Card[]
   mergeLogs         MergeLog[]
+  reminderSetting   BirthdayReminderSetting?
+  reminderLogs      BirthdayReminderLog[]
 }
 
 // ===== 名片库 =====
@@ -121,6 +124,7 @@ model Card {
   // === 合并关联 ===
   mergeLogsAsSource MergeLog[] @relation("SourceCard")
   mergeLogsAsTarget MergeLog[] @relation("TargetCard")
+  birthdayReminderLogs BirthdayReminderLog[]
 }
 
 // ===== 字段可见性控制 =====
@@ -194,4 +198,38 @@ model MergeLog {
 
   sourceCard Card @relation("SourceCard", fields: [sourceCardId], references: [id])
   targetCard Card @relation("TargetCard", fields: [targetCardId], references: [id])
+}
+
+// ===== 生日提醒设置 =====
+model BirthdayReminderSetting {
+  id                Int      @id @default(autoincrement())
+  userId            Int      @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enabled           Boolean  @default(true)
+  daysBefore        String   @default("[7,3,1,0]") // JSON: 提前天数
+  reminderTime      String   @default("09:00") // HH:mm
+  subscribeTemplateId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// ===== 生日提醒发送记录 =====
+model BirthdayReminderLog {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cardId       Int
+  card         Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  birthdayType String   // solar | lunar
+  birthdayDate String   // YYYY-MM-DD，本年度生日日期
+  daysBefore   Int
+  remindKey    String   @unique // userId-cardId-type-date-daysBefore
+  channel      String   @default("wechat_subscribe")
+  status       String   @default("pending") // pending | sent | failed | skipped
+  error        String?
+  sentAt       DateTime?
+  createdAt    DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([cardId, birthdayDate])
 }

@@ -24,9 +24,11 @@ Page({
   },
 
   onSettings() {
-    wx.navigateTo({
-      url: '/pages/settings/index'
-    });
+    wx.showToast({ title: '个人信息可在后台维护', icon: 'none' });
+  },
+
+  onBirthdayReminders() {
+    wx.navigateTo({ url: '/pages/reminders/index' });
   },
 
   onServerSettings() {

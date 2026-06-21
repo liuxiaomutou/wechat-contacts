@@ -6,6 +6,7 @@
     "pages/card-detail/index",
     "pages/card-edit/index",
     "pages/profile/index",
+    "pages/reminders/index",
     "pages/members/index",
     "pages/visibility/index"
   ],

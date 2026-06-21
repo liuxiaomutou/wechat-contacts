@@ -7,6 +7,8 @@ import cardsRouter from './routes/cards';
 import duplicatesRouter from './routes/duplicates';
 import exportRouter from './routes/exportImport';
 import uploadsRouter from './routes/uploads';
+import remindersRouter from './routes/reminders';
+import { startBirthdayReminderScheduler } from './services/birthdayReminders';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -24,6 +26,9 @@ app.use('/api/cards', cardsRouter);
 app.use('/api/duplicates', duplicatesRouter);
 app.use('/api/export', exportRouter);
 app.use('/api/uploads', uploadsRouter);
+app.use('/api/reminders', remindersRouter);
+
+const birthdayReminderTimer = startBirthdayReminderScheduler(prisma);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
@@ -34,6 +39,7 @@ app.listen(PORT, () => {
 });
 
 process.on('SIGINT', async () => {
+  clearInterval(birthdayReminderTimer);
   await prisma.$disconnect();
   process.exit(0);
 });

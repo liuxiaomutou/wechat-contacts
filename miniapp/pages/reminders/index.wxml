@@ -1,0 +1,47 @@
+<view class="container">
+  <view class="card">
+    <view class="row">
+      <view>
+        <view class="title">生日提醒</view>
+        <view class="desc">按名片里的阳历/农历生日自动提醒</view>
+      </view>
+      <switch checked="{{enabled}}" bindchange="onEnabledChange" />
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="label">提醒时间</view>
+    <picker mode="time" value="{{reminderTime}}" bindchange="onTimeChange">
+      <view class="picker">{{reminderTime}}</view>
+    </picker>
+  </view>
+
+  <view class="card">
+    <view class="label">提醒节点</view>
+    <checkbox-group bindchange="onDayChange">
+      <label class="check-row" wx:for="{{dayOptions}}" wx:key="value">
+        <checkbox value="{{item.value}}" checked="{{item.checked}}" color="#07c160" />
+        <text>{{item.label}}</text>
+      </label>
+    </checkbox-group>
+  </view>
+
+  <view class="card">
+    <view class="label">小程序订阅消息</view>
+    <input class="input" value="{{templateId}}" bindinput="onTemplateInput" bindblur="onTemplateBlur" placeholder="订阅消息模板ID" />
+    <view class="tips">需要在微信小程序后台申请模板。模板ID也可由服务端环境变量 WECHAT_BIRTHDAY_TEMPLATE_ID 配置。</view>
+    <view class="btn-row">
+      <button class="btn" bindtap="bindWechat">绑定微信</button>
+      <button class="btn primary" bindtap="requestSubscribe">授权订阅</button>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="label">最近提醒记录</view>
+    <view wx:if="{{!logs.length}}" class="empty">暂无记录</view>
+    <view class="log" wx:for="{{logs}}" wx:key="id">
+      <view>{{item.card.name}} · {{item.daysBefore === 0 ? '当天' : item.daysBefore + '天前'}}</view>
+      <view class="muted">{{item.birthdayDate}} · {{item.status}}{{item.error ? ' · ' + item.error : ''}}</view>
+    </view>
+  </view>
+</view>
