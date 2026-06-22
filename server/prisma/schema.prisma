@@ -17,6 +17,7 @@ model User {
   phone     String?
   wxOpenid  String?  @unique
   role      String   @default("user") // super_admin | library_admin | user
+  defaultLibraryId Int? // 默认名片库 ID（后台快速选择用）
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

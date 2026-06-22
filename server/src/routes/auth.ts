@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { authMiddleware, generateToken } from '../middleware/auth';
 
 const router = Router();
-const USER_SELECT = { id: true, username: true, nickname: true, role: true, phone: true, avatar: true, createdAt: true };
+const USER_SELECT = { id: true, username: true, nickname: true, role: true, phone: true, avatar: true, defaultLibraryId: true, createdAt: true };
 const VALID_USER_ROLES = ['super_admin', 'user'];
 
 function sanitizeUser(user: any) {
@@ -15,6 +15,7 @@ function sanitizeUser(user: any) {
     role: user.role,
     avatar: user.avatar,
     phone: user.phone,
+    defaultLibraryId: user.defaultLibraryId,
     createdAt: user.createdAt,
   };
 }
@@ -81,11 +82,12 @@ router.get('/me', authMiddleware, async (req: any, res: Response) => {
 router.put('/me', authMiddleware, async (req: any, res: Response) => {
   try {
     const prisma: PrismaClient = req.app.locals.prisma;
-    const { nickname, avatar, phone } = req.body;
+    const { nickname, avatar, phone, defaultLibraryId } = req.body;
     const data: any = {};
     if (nickname !== undefined) data.nickname = nickname;
     if (avatar !== undefined) data.avatar = avatar;
     if (phone !== undefined) data.phone = phone;
+    if (defaultLibraryId !== undefined) data.defaultLibraryId = defaultLibraryId === null || defaultLibraryId === '' ? null : parseInt(defaultLibraryId, 10);
 
     const user = await prisma.user.update({ where: { id: req.user.id }, data, select: USER_SELECT });
     res.json(user);
