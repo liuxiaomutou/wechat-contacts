@@ -24,3 +24,19 @@
 .experience-form .input { width:100%; margin-bottom:14rpx; }
 .remove-button { height:64rpx; border-radius:32rpx; background:#eef0f2; color:#777; display:flex; align-items:center; justify-content:center; font-size:26rpx; margin-top:4rpx; }
 .submit-button { position:fixed; left:24rpx; right:24rpx; bottom:34rpx; height:82rpx; line-height:82rpx; background:#07c160; color:#fff; text-align:center; border-radius:44rpx; font-size:31rpx; font-weight:700; box-shadow:0 8rpx 24rpx rgba(7,193,96,.28); }
+
+/* 标签 + 值行 */
+.label-row { display:flex; align-items:center; gap:10rpx; margin-bottom:14rpx; }
+.label-picker { min-width:96rpx; height:64rpx; line-height:64rpx; padding:0 12rpx; border:1rpx solid #07c160; border-radius:10rpx; color:#07c160; font-size:26rpx; text-align:center; background:#f0faf0; }
+
+/* 地址卡片 */
+.address-card { border:1rpx solid #eef0f2; border-radius:16rpx; padding:16rpx; margin-bottom:16rpx; background:#f8fafc; }
+.addr-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12rpx; }
+.addr-label { min-width:auto; height:56rpx; line-height:56rpx; padding:0 16rpx; border-radius:28rpx; }
+.addr-row { margin-bottom:10rpx; display:flex; gap:10rpx; }
+.addr-sub-row { display:flex; gap:10rpx; width:100%; }
+.addr-picker { flex:1; }
+.addr-picker.short { flex:0 0 180rpx; min-width:180rpx; }
+.addr-detail { flex:1; }
+.addr-only-detail { width:100%; margin-top:10rpx; }
+.empty-tip { display:flex; align-items:center; justify-content:center; min-height:68rpx; border:2rpx dashed #cfd5dc; border-radius:14rpx; color:#07c160; font-size:28rpx; background:#fafafa; }

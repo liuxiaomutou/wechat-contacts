@@ -1,14 +1,33 @@
 import { getCard, deleteCard } from '../../utils/api';
 
-function arr(v, fallback) {
+function arr(v, fallback = []) {
   if (Array.isArray(v)) return v;
   if (typeof v === 'string' && v.trim()) {
-    try { const p = JSON.parse(v); return Array.isArray(p) ? p : [v]; } catch { return [v]; }
+    try { const p = JSON.parse(v); return Array.isArray(p) ? p : [v]; }
+    catch { return [v]; }
   }
-  return fallback ? [fallback] : [];
+  if (fallback && typeof fallback === 'string' && fallback.trim()) return [{ label: '', value: fallback }];
+  return fallback || [];
 }
 function visible(v) {
   return v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0);
+}
+function normalizeEntries(entries, singleFallback) {
+  if (!Array.isArray(entries)) {
+    if (singleFallback) return [{ label: '', value: singleFallback }];
+    return [];
+  }
+  if (entries.length === 0) return singleFallback ? [{ label: '', value: singleFallback }] : [];
+  if (typeof entries[0] === 'string') return entries.filter(Boolean).map(v => ({ label: '', value: v }));
+  return entries.filter(e => e.value || e.label);
+}
+function formatAddress(a) {
+  if (!a) return '';
+  const parts = [a.province, a.city, a.district, a.detail].filter(Boolean);
+  return parts.join(' ');
+}
+function getInitial(name) {
+  return (name || '?').slice(0, 1);
 }
 
 Page({
@@ -17,6 +36,7 @@ Page({
     card: {},
     phones: [],
     emails: [],
+    addresses: [],
     education: [],
     workExperience: [],
     socialPositions: [],
@@ -38,10 +58,14 @@ Page({
   async loadCard() {
     try {
       const card = await getCard(this.data.cardId);
+      const phones = normalizeEntries(card.phones, card.phone);
+      const emails = normalizeEntries(card.emails, card.email);
+      const addresses = Array.isArray(card.addresses) ? card.addresses.filter(a => a.province || a.detail) : [];
       this.setData({
-        card: { ...card, initial: (card.name || '?').slice(0, 1) },
-        phones: arr(card.phones, card.phone),
-        emails: arr(card.emails, card.email),
+        card: { ...card, initial: getInitial(card.name) },
+        phones,
+        emails,
+        addresses: addresses.map(a => ({ ...a, addressText: formatAddress(a) })),
         education: arr(card.educationBackground),
         workExperience: arr(card.workExperience),
         socialPositions: arr(card.socialPositions),
@@ -54,12 +78,11 @@ Page({
     }
   },
 
-  isVisible(e) {
-    return visible(e);
-  },
+  isVisible(e) { return visible(e); },
+  isEmptyArray(e) { return Array.isArray(e) && e.length === 0; },
 
   callPhone(e) {
-    const phone = e.currentTarget.dataset.phone || this.data.phones[0];
+    const phone = e.currentTarget.dataset.phone;
     if (!phone) return;
     wx.makePhoneCall({ phoneNumber: phone });
   },
@@ -85,9 +108,7 @@ Page({
     this.setData({ showConfirm: true });
   },
 
-  closeConfirm() {
-    this.setData({ showConfirm: false });
-  },
+  closeConfirm() { this.setData({ showConfirm: false }); },
 
   async confirmDelete() {
     try {

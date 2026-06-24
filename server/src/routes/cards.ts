@@ -4,7 +4,7 @@ import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 const ROLE_HIERARCHY: Record<string, number> = { admin: 4, manager: 3, editor: 2, viewer: 1 };
-const JSON_FIELDS = ['phones', 'emails', 'educationBackground', 'workExperience', 'socialPositions', 'skills'];
+const JSON_FIELDS = ['phones', 'emails', 'educationBackground', 'workExperience', 'socialPositions', 'skills', 'addresses'];
 const SIMPLE_FIELDS = [
   'email', 'company', 'position', 'industry', 'field', 'gender',
   'solarBirthday', 'lunarBirthday', 'ethnicity', 'maritalStatus',
@@ -19,6 +19,7 @@ const DEFAULT_LIBRARY_FIELDS: Record<string, boolean> = {
   linkedin: false, fax: false, socialPositions: true, skills: true, industry: true, field: true, gender: true,
   solarBirthday: true, lunarBirthday: true, ethnicity: true, maritalStatus: true,
   province: true, city: true, district: true, township: true, detailAddress: true,
+  addresses: true,
 };
 
 function parseJson(value: any, fallback: any = null) {
@@ -30,12 +31,26 @@ function toJson(value: any) {
   if (value === undefined) return undefined;
   return typeof value === 'string' ? value : JSON.stringify(value);
 }
-function normalizeArray(value: any, fallbackSingle?: string) {
+
+// 标准化 phone/email entries：支持新版 [{label, value}] 和旧版 [string]
+function normalizeEntries(value: any, fallbackSingle?: string) {
   const parsed = parseJson(value, value);
-  if (Array.isArray(parsed)) return parsed.filter(Boolean);
-  if (typeof parsed === 'string' && parsed.trim()) return [parsed.trim()];
-  return fallbackSingle ? [fallbackSingle] : [];
+  if (Array.isArray(parsed)) {
+    if (parsed.length === 0) return [];
+    // 检测是旧版纯字符串数组还是新版对象数组
+    if (typeof parsed[0] === 'string') {
+      return parsed.filter(Boolean).map(v => ({ label: '', value: v }));
+    }
+    if (typeof parsed[0] === 'object') {
+      return parsed.filter((e: any) => e.value || e.label);
+    }
+    return parsed.filter(Boolean);
+  }
+  const fallback = fallbackSingle ? [{ label: '', value: fallbackSingle }] : [];
+  if (typeof parsed === 'string' && parsed.trim()) return [{ label: '', value: parsed.trim() }];
+  return fallback;
 }
+
 function parseFieldSettings(library: any) {
   return { ...DEFAULT_LIBRARY_FIELDS, ...(parseJson(library?.fieldSettings, {}) || {}) };
 }
@@ -55,10 +70,13 @@ function actionFlags(role: string, isOwner: boolean) {
 function serializeCard(card: any, role = 'viewer', currentUserId?: number) {
   const result: any = { ...card };
   for (const field of JSON_FIELDS) result[field] = parseJson(result[field], field === 'skills' ? [] : []);
-  result.phones = normalizeArray(result.phones, result.phone);
-  result.emails = normalizeArray(result.emails, result.email || undefined);
-  if (!result.phone && result.phones.length) result.phone = result.phones[0];
-  if (!result.email && result.emails.length) result.email = result.emails[0];
+  // 标准化 phone/email entries
+  result.phones = normalizeEntries(result.phones, result.phone);
+  result.emails = normalizeEntries(result.emails, result.email || undefined);
+  result.addresses = Array.isArray(result.addresses) ? result.addresses : [];
+  // 兼容旧字段取首条
+  if (result.phones.length && !result.phone) result.phone = result.phones[0].value || '';
+  if (result.emails.length && !result.email) result.email = result.emails[0].value || '';
 
   const settings = parseFieldSettings(card.library);
   const perCardVis: Record<string, string> = {};
@@ -95,17 +113,23 @@ function buildCardData(body: any, ownerId?: number) {
   if (libraryId !== undefined) data.libraryId = parseInt(libraryId, 10);
   if (ownerId !== undefined) data.ownerId = ownerId;
   if (name !== undefined) data.name = name;
-  if (phone !== undefined) data.phone = phone;
+  if (phone !== undefined) data.phone = typeof phone === 'string' ? phone : (phone?.value || '');
   if (phones !== undefined) {
     data.phones = toJson(phones);
-    if (!data.phone && Array.isArray(phones) && phones[0]) data.phone = phones[0];
+    if (!data.phone && Array.isArray(phones) && phones.length) {
+      const first = phones[0];
+      data.phone = typeof first === 'string' ? first : (first?.value || '');
+    }
   }
-  if (email !== undefined) data.email = email;
+  if (email !== undefined) data.email = typeof email === 'string' ? email : (email?.value || '');
   if (emails !== undefined) {
     data.emails = toJson(emails);
-    if (!data.email && Array.isArray(emails) && emails[0]) data.email = emails[0];
+    if (!data.email && Array.isArray(emails) && emails.length) {
+      const first = emails[0];
+      data.email = typeof first === 'string' ? first : (first?.value || '');
+    }
   }
-  for (const field of ['educationBackground', 'workExperience', 'socialPositions', 'skills']) {
+  for (const field of ['educationBackground', 'workExperience', 'socialPositions', 'skills', 'addresses']) {
     if (rest[field] !== undefined) data[field] = toJson(rest[field]);
   }
   for (const f of SIMPLE_FIELDS) if (rest[f] !== undefined) data[f] = rest[f];

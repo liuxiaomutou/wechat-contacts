@@ -126,6 +126,7 @@ model Card {
   mergeLogsAsSource MergeLog[] @relation("SourceCard")
   mergeLogsAsTarget MergeLog[] @relation("TargetCard")
   birthdayReminderLogs BirthdayReminderLog[]
+  addresses String? // JSON: [{label, province, city, district, detail}]
 }
 
 // ===== 字段可见性控制 =====

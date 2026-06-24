@@ -70,6 +70,9 @@ th { font-weight:600; color:var(--text-secondary); font-size:12px; } tr:hover td
 .detail-head { display:flex; gap:16px; align-items:center; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--border); }
 .detail-name { font-size:22px; font-weight:700; } .detail-sub { color:#666; margin-top:4px; }
 .info-list { display:grid; grid-template-columns:120px 1fr; gap:8px 12px; font-size:13px; } .info-label { color:#999; }
+.info-row { display:flex; padding:10px 0; border-bottom:1px solid #f0f0f0; font-size:13px; }
+.info-row:last-child { border-bottom:0; }
+.mini-label { display:inline-block; background:#e8f5e9; color:#07c160; font-size:12px; padding:1px 8px; border-radius:3px; margin-right:6px; font-weight:500; }
 .exp-item { background:#f8fafc; border-radius:8px; padding:10px; margin:8px 0; font-size:13px; }
 .dup-card { border:1px solid var(--border); border-radius:8px; padding:12px; margin:8px 0; } .dup-highlight span { background:#fff3e0; padding:2px 8px; border-radius:4px; font-size:11px; }
 .file-upload { display:flex; align-items:center; gap:12px; padding:20px; border:2px dashed var(--border); border-radius:12px; margin-bottom:16px; cursor:pointer; }

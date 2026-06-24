@@ -1,4 +1,5 @@
 <view class="container">
+  <!-- 基本信息 -->
   <view class="section">
     <text class="section-title">基本信息</text>
     <view class="avatar-uploader" bindtap="chooseAvatar">
@@ -10,6 +11,7 @@
     <view class="form-item"><text class="label">公开</text><switch checked="{{card.isPublic}}" bindchange="onPublicChange" /></view>
   </view>
 
+  <!-- 工作信息 -->
   <view class="section">
     <text class="section-title">工作信息</text>
     <view class="form-item"><text class="label">工作单位</text><input class="input" value="{{card.company}}" data-field="company" bindinput="setField" /></view>
@@ -18,21 +20,72 @@
     <view class="form-item"><text class="label">领域</text><input class="input" value="{{card.field}}" data-field="field" bindinput="setField" /></view>
   </view>
 
+  <!-- 联系方式 - 电话 -->
   <view class="section">
-    <view class="section-head"><text class="section-title no-border">手机</text><view class="circle-add" bindtap="addPhone">+</view></view>
-    <view class="array-row" wx:for="{{card.phones}}" wx:key="index">
-      <input class="input" value="{{item}}" data-index="{{index}}" bindinput="onPhoneInput" placeholder="电话" />
-      <view class="small-btn muted" data-index="{{index}}" bindtap="removePhone">删</view>
+    <view class="section-head"><text class="section-title no-border">电话</text><view class="circle-add" bindtap="addPhoneEntry">+</view></view>
+    <view class="label-row" wx:for="{{card.phoneEntries}}" wx:key="index">
+      <picker mode="selector" range="{{phoneLabels}}" bindchange="onPhoneLabelChange" data-index="{{index}}">
+        <view class="label-picker">{{item.label}}</view>
+      </picker>
+      <input class="input phone-input" value="{{item.value}}" data-index="{{index}}" bindinput="onPhoneValue" placeholder="手机号码" type="text" />
+      <view class="small-btn muted" data-index="{{index}}" bindtap="removePhoneEntry">✕</view>
     </view>
-    <view class="section-head mt"><text class="section-title no-border">邮箱</text><view class="circle-add" bindtap="addEmail">+</view></view>
-    <view class="array-row" wx:for="{{card.emails}}" wx:key="index">
-      <input class="input" value="{{item}}" data-index="{{index}}" bindinput="onEmailInput" placeholder="邮箱" />
-      <view class="small-btn muted" data-index="{{index}}" bindtap="removeEmail">删</view>
+  </view>
+
+  <!-- 联系方式 - 邮箱 -->
+  <view class="section">
+    <view class="section-head"><text class="section-title no-border">邮箱</text><view class="circle-add" bindtap="addEmailEntry">+</view></view>
+    <view class="label-row" wx:for="{{card.emailEntries}}" wx:key="index">
+      <picker mode="selector" range="{{emailLabels}}" bindchange="onEmailLabelChange" data-index="{{index}}">
+        <view class="label-picker">{{item.label}}</view>
+      </picker>
+      <input class="input phone-input" value="{{item.value}}" data-index="{{index}}" bindinput="onEmailValue" placeholder="邮箱地址" />
+      <view class="small-btn muted" data-index="{{index}}" bindtap="removeEmailEntry">✕</view>
     </view>
+  </view>
+
+  <!-- 其他联系方式 -->
+  <view class="section">
+    <text class="section-title">其他联系方式</text>
     <view class="form-item"><text class="label">微信</text><input class="input" value="{{card.wechat}}" data-field="wechat" bindinput="setField" /></view>
     <view class="form-item"><text class="label">QQ</text><input class="input" value="{{card.qq}}" data-field="qq" bindinput="setField" /></view>
   </view>
 
+  <!-- 地址 -->
+  <view class="section">
+    <view class="section-head"><text class="section-title no-border">地址</text><view class="circle-add" bindtap="addAddressEntry">+</view></view>
+    <view class="address-card" wx:for="{{card.addressEntries}}" wx:key="index">
+      <view class="addr-header">
+        <picker mode="selector" range="{{addressLabels}}" bindchange="onAddressLabelChange" data-index="{{index}}">
+          <view class="label-picker addr-label">{{item.label}}</view>
+        </picker>
+        <view class="small-btn muted" data-index="{{index}}" bindtap="removeAddressEntry">✕</view>
+      </view>
+      <view class="addr-row">
+        <picker mode="selector" range="{{provinces}}" bindchange="onAddressProvinceChange" data-index="{{index}}">
+          <view class="picker addr-picker">{{item.province || '选择省'}}</view>
+        </picker>
+      </view>
+      <view class="addr-row">
+        <picker mode="selector" range="{{provinces[provinceIdx] && provinces[provinceIdx].cities || []}}" bindchange="onAddressCityChange" data-index="{{index}}" wx:if="{{item.province}}">
+          <view class="picker addr-picker">{{item.city || '选择市'}}</view>
+        </picker>
+        <input class="input" wx:else placeholder="先选择省" disabled />
+      </view>
+      <view class="addr-row" wx:if="{{item.province && item.city}}">
+        <view class="addr-sub-row">
+          <picker mode="selector" range="{{item._districts || []}}" bindchange="onAddressDistrictChange" data-index="{{index}}">
+            <view class="picker addr-picker short">{{item.district || '区/县'}}</view>
+          </picker>
+          <input class="input addr-detail" value="{{item.detail}}" data-index="{{index}}" bindinput="onAddressDetail" placeholder="详细地址" />
+        </view>
+      </view>
+      <input class="input addr-only-detail" wx:else value="{{item.detail}}" data-index="{{index}}" bindinput="onAddressDetail" placeholder="详细地址" />
+    </view>
+    <view class="empty-tip" wx:if="{{card.addressEntries.length === 0}}" bindtap="addAddressEntry">+ 添加地址</view>
+  </view>
+
+  <!-- 生日与身份 -->
   <view class="section">
     <text class="section-title">生日与身份</text>
     <view class="form-item"><text class="label">阳历生日</text><picker mode="date" value="{{card.solarBirthday}}" bindchange="onSolarBirthdayChange"><view class="picker">{{card.solarBirthday || '选择日期'}}</view></picker></view>
@@ -42,15 +95,7 @@
     <view class="form-item"><text class="label">婚姻</text><picker mode="selector" range="{{marriages}}" range-key="label" bindchange="onMarriageChange"><view class="picker">{{card.maritalStatus || '未设置'}}</view></picker></view>
   </view>
 
-  <view class="section">
-    <text class="section-title">地址</text>
-    <view class="form-item"><text class="label">省</text><input class="input" value="{{card.province}}" data-field="province" bindinput="setField" /></view>
-    <view class="form-item"><text class="label">市</text><input class="input" value="{{card.city}}" data-field="city" bindinput="setField" /></view>
-    <view class="form-item"><text class="label">区/县</text><input class="input" value="{{card.district}}" data-field="district" bindinput="setField" /></view>
-    <view class="form-item"><text class="label">街道/乡镇</text><input class="input" value="{{card.township}}" data-field="township" bindinput="setField" /></view>
-    <view class="form-item"><text class="label">详细地址</text><input class="input" value="{{card.detailAddress}}" data-field="detailAddress" bindinput="setField" /></view>
-  </view>
-
+  <!-- 教育经历 -->
   <view class="section">
     <view class="section-head"><text class="section-title no-border">教育经历</text><view class="circle-add" bindtap="addEducation">+</view></view>
     <view class="experience-form" wx:for="{{card.educationBackground}}" wx:key="index">
@@ -61,6 +106,7 @@
     </view>
   </view>
 
+  <!-- 工作经历 -->
   <view class="section">
     <view class="section-head"><text class="section-title no-border">工作经历</text><view class="circle-add" bindtap="addWorkExperience">+</view></view>
     <view class="experience-form" wx:for="{{card.workExperience}}" wx:key="index">
@@ -71,6 +117,7 @@
     </view>
   </view>
 
+  <!-- 社会职务 -->
   <view class="section">
     <view class="section-head"><text class="section-title no-border">社会职务</text><view class="circle-add" bindtap="addSocialPosition">+</view></view>
     <view class="experience-form" wx:for="{{card.socialPositions}}" wx:key="index">
@@ -80,6 +127,7 @@
     </view>
   </view>
 
+  <!-- 其他 -->
   <view class="section">
     <text class="section-title">其他</text>
     <view class="form-item"><text class="label">标签</text><input class="input" value="{{card.tags}}" data-field="tags" bindinput="setField" placeholder="多个标签可用逗号隔开" /></view>

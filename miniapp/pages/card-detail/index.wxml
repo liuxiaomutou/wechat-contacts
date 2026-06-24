@@ -1,102 +1,136 @@
 <view class="container">
+  <!-- 确认删除弹窗 -->
+  <view class="overlay" wx:if="{{showConfirm}}">
+    <view class="dialog">
+      <text class="dialog-title">确认删除</text>
+      <text class="dialog-body">确定要删除该名片吗？删除后无法恢复。</text>
+      <view class="dialog-buttons">
+        <view class="dialog-btn cancel" bindtap="closeConfirm">取消</view>
+        <view class="dialog-btn danger" bindtap="confirmDelete">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 头部 -->
   <view class="header">
-    <view class="avatar" wx:if="{{!card.avatar}}">{{card.initial}}</view>
-    <image class="avatar image" wx:else src="{{card.avatar}}" mode="aspectFill" />
-    <view class="info">
-      <text class="name">{{card.name || '-'}}</text>
-      <text class="company-title">{{card.company || '-'}}{{card.position ? ' · ' + card.position : ''}}</text>
-      <text class="role-tag">{{card.role || 'viewer'}}</text>
+    <image wx:if="{{card.avatar}}" class="header-avatar" src="{{card.avatar}}" mode="aspectFill" />
+    <view wx:else class="header-avatar header-initial">{{card.initial}}</view>
+    <text class="header-name">{{card.name}}</text>
+    <text wx:if="{{card.company || card.position}}" class="header-sub">{{[card.company, card.position].filter(Boolean).join(' · ')}}</text>
+    <view class="header-tags">
+      <text wx:if="{{card.gender}}" class="tag">{{card.gender === 'male' ? '男' : card.gender === 'female' ? '女' : card.gender}}</text>
+      <text wx:if="{{card.field}}" class="tag">{{card.field}}</text>
+      <text wx:if="{{card.industry}}" class="tag">{{card.industry}}</text>
+    </view>
+    <view class="header-actions" wx:if="{{canEdit || canSetVisibility || canDelete}}">
+      <view class="action-btn" wx:if="{{canEdit}}" bindtap="onEditCard">✏️ 编辑</view>
+      <view class="action-btn" wx:if="{{canSetVisibility}}" bindtap="onSetVisibility">👁 可见</view>
+      <view class="action-btn danger" wx:if="{{canDelete}}" bindtap="onDeleteCard">🗑 删除</view>
     </view>
   </view>
 
-  <view class="section">
-    <text class="section-title">基本信息</text>
-    <view class="info-item"><text class="label">姓名</text><text class="value">{{card.name || '-'}}</text></view>
-    <view class="info-item"><text class="label">性别</text><text class="value">{{card.gender || '-'}}</text></view>
-    <view class="info-item"><text class="label">工作单位</text><text class="value">{{card.company || '-'}}</text></view>
-    <view class="info-item"><text class="label">职位</text><text class="value">{{card.position || '-'}}</text></view>
-    <view class="info-item"><text class="label">行业</text><text class="value">{{card.industry || '-'}}</text></view>
-    <view class="info-item"><text class="label">领域</text><text class="value">{{card.field || '-'}}</text></view>
+  <!-- 电话 -->
+  <view class="section" wx:if="{{phones.length}}">
+    <text class="section-title">电话</text>
+    <view class="entry-row" wx:for="{{phones}}" wx:key="index" data-value="{{item.value}}" bindtap="callPhone" data-phone="{{item.value}}">
+      <text wx:if="{{item.label}}" class="entry-label">{{item.label}}</text>
+      <text class="entry-value phone-value">{{item.value}}</text>
+      <text class="entry-action call-icon">📞</text>
+    </view>
   </view>
 
-  <view class="section">
-    <text class="section-title">联系方式</text>
-    <block wx:if="{{phones.length}}">
-      <view class="info-item" wx:for="{{phones}}" wx:key="index" wx:for-item="phone"><text class="label">电话{{index + 1}}</text><text class="value link" data-phone="{{phone}}" bindtap="callPhone">{{phone}}</text></view>
-    </block>
-    <view class="info-item" wx:else><text class="label">电话</text><text class="value">-</text></view>
-    <block wx:if="{{emails.length}}">
-      <view class="info-item" wx:for="{{emails}}" wx:key="index" wx:for-item="email"><text class="label">邮箱{{index + 1}}</text><text class="value link" data-value="{{email}}" bindtap="copyValue">{{email}}</text></view>
-    </block>
-    <view class="info-item" wx:else><text class="label">邮箱</text><text class="value">-</text></view>
-    <view class="info-item"><text class="label">微信</text><text class="value link" data-value="{{card.wechat}}" bindtap="copyValue">{{card.wechat || '-'}}</text></view>
-    <view class="info-item"><text class="label">QQ</text><text class="value">{{card.qq || '-'}}</text></view>
-    <view class="info-item"><text class="label">网站</text><text class="value link" data-value="{{card.website}}" bindtap="copyValue">{{card.website || '-'}}</text></view>
-    <view class="info-item"><text class="label">LinkedIn</text><text class="value link" data-value="{{card.linkedin}}" bindtap="copyValue">{{card.linkedin || '-'}}</text></view>
-    <view class="info-item"><text class="label">传真</text><text class="value">{{card.fax || '-'}}</text></view>
+  <!-- 邮箱 -->
+  <view class="section" wx:if="{{emails.length}}">
+    <text class="section-title">邮箱</text>
+    <view class="entry-row" wx:for="{{emails}}" wx:key="index" data-value="{{item.value}}" bindtap="copyValue">
+      <text wx:if="{{item.label}}" class="entry-label">{{item.label}}</text>
+      <text class="entry-value email-value">{{item.value}}</text>
+      <text class="entry-action copy-icon">📋</text>
+    </view>
   </view>
 
-  <view class="section">
-    <text class="section-title">生日与身份</text>
-    <view class="info-item"><text class="label">阳历生日</text><text class="value">{{card.solarBirthday || '-'}}</text></view>
-    <view class="info-item"><text class="label">农历生日</text><text class="value">{{card.lunarBirthday || '-'}}</text></view>
-    <view class="info-item"><text class="label">民族</text><text class="value">{{card.ethnicity || '-'}}</text></view>
-    <view class="info-item"><text class="label">籍贯</text><text class="value">{{card.birthplace || '-'}}</text></view>
-    <view class="info-item"><text class="label">婚姻</text><text class="value">{{card.maritalStatus || '-'}}</text></view>
-  </view>
-
-  <view class="section">
+  <!-- 地址 -->
+  <view class="section" wx:if="{{addresses.length}}">
     <text class="section-title">地址</text>
-    <view class="info-item"><text class="label">省</text><text class="value">{{card.province || '-'}}</text></view>
-    <view class="info-item"><text class="label">市</text><text class="value">{{card.city || '-'}}</text></view>
-    <view class="info-item"><text class="label">区/县</text><text class="value">{{card.district || '-'}}</text></view>
-    <view class="info-item"><text class="label">街道/乡镇</text><text class="value">{{card.township || '-'}}</text></view>
-    <view class="info-item"><text class="label">详细地址</text><text class="value">{{card.detailAddress || '-'}}</text></view>
-    <view class="info-item"><text class="label">住宅地址</text><text class="value">{{card.residentialAddress || '-'}}</text></view>
-    <view class="info-item"><text class="label">老家地址</text><text class="value">{{card.hometownAddress || '-'}}</text></view>
+    <view class="entry-row" wx:for="{{addresses}}" wx:key="index" data-value="{{item.addressText}}" bindtap="copyValue">
+      <text wx:if="{{item.label}}" class="entry-label">{{item.label}}</text>
+      <view class="entry-value-block">
+        <text class="address-region" wx:if="{{item.province || item.city || item.district}}">
+          {{[item.province, item.city, item.district].filter(Boolean).join(' ')}}
+        </text>
+        <text class="address-detail" wx:if="{{item.detail}}">{{item.detail}}</text>
+      </view>
+      <text class="entry-action copy-icon">📋</text>
+    </view>
   </view>
 
-  <view class="section">
+  <!-- 微信 -->
+  <view class="section" wx:if="{{card.wechat}}">
+    <text class="section-title">微信</text>
+    <view class="entry-row" data-value="{{card.wechat}}" bindtap="copyValue">
+      <text class="entry-value">{{card.wechat}}</text>
+      <text class="entry-action copy-icon">📋</text>
+    </view>
+  </view>
+
+  <!-- 生日 -->
+  <view class="section" wx:if="{{card.solarBirthday || card.lunarBirthday}}">
+    <text class="section-title">生日</text>
+    <view class="entry-row" wx:if="{{card.solarBirthday}}">
+      <text class="entry-label">阳历</text>
+      <text class="entry-value">{{card.solarBirthday}}</text>
+    </view>
+    <view class="entry-row" wx:if="{{card.lunarBirthday}}">
+      <text class="entry-label">农历</text>
+      <text class="entry-value">{{card.lunarBirthday}}</text>
+    </view>
+  </view>
+
+  <!-- 基本信息 -->
+  <view class="section" wx:if="{{card.ethnicity || card.birthplace || card.maritalStatus || card.qq || card.website}}">
+    <text class="section-title">详细信息</text>
+    <view class="info-grid">
+      <view class="info-item" wx:if="{{card.ethnicity}}"><text class="info-label">民族</text><text class="info-value">{{card.ethnicity}}</text></view>
+      <view class="info-item" wx:if="{{card.birthplace}}"><text class="info-label">籍贯</text><text class="info-value">{{card.birthplace}}</text></view>
+      <view class="info-item" wx:if="{{card.maritalStatus}}"><text class="info-label">婚姻</text><text class="info-value">{{card.maritalStatus}}</text></view>
+      <view class="info-item" wx:if="{{card.tags}}"><text class="info-label">标签</text><text class="info-value">{{card.tags}}</text></view>
+    </view>
+    <view class="entry-row" wx:if="{{card.qq}}" data-value="{{card.qq}}" bindtap="copyValue"><text class="entry-label">QQ</text><text class="entry-value">{{card.qq}}</text></view>
+    <view class="entry-row" wx:if="{{card.website}}" data-value="{{card.website}}" bindtap="copyValue"><text class="entry-label">网站</text><text class="entry-value">{{card.website}}</text></view>
+  </view>
+
+  <!-- 教育经历 -->
+  <view class="section" wx:if="{{education.length}}">
     <text class="section-title">教育经历</text>
-    <view class="empty-line" wx:if="{{education.length === 0}}">暂无教育经历</view>
-    <view class="experience-item" wx:for="{{education}}" wx:key="index">
-      <text class="experience-date">{{item.startYear || item.startDate || '-'}} - {{item.endYear || item.endDate || '-'}}</text>
-      <text class="experience-text">{{item.school || '-'}} {{item.degree || item.major || ''}}</text>
+    <view class="list-item" wx:for="{{education}}" wx:key="index">
+      <text class="list-year">{{item.startYear}}-{{item.endYear || '至今'}}</text>
+      <text class="list-title">{{item.school}}</text>
+      <text wx:if="{{item.degree}}" class="list-sub">{{item.degree}}</text>
     </view>
   </view>
 
-  <view class="section">
+  <!-- 工作经历 -->
+  <view class="section" wx:if="{{workExperience.length}}">
     <text class="section-title">工作经历</text>
-    <view class="empty-line" wx:if="{{workExperience.length === 0}}">暂无工作经历</view>
-    <view class="experience-item" wx:for="{{workExperience}}" wx:key="index">
-      <text class="experience-date">{{item.startYear || item.startDate || '-'}} - {{item.endYear || item.endDate || '-'}}</text>
-      <text class="experience-text">{{item.company || '-'}} {{item.position || ''}}</text>
-      <text class="experience-desc" wx:if="{{item.description}}">{{item.description}}</text>
+    <view class="list-item" wx:for="{{workExperience}}" wx:key="index">
+      <text class="list-year">{{item.startYear}}-{{item.endYear || '至今'}}</text>
+      <text class="list-title">{{item.company}}</text>
+      <text wx:if="{{item.position}}" class="list-sub">{{item.position}}</text>
     </view>
   </view>
 
-  <view class="section">
+  <!-- 社会职务 -->
+  <view class="section" wx:if="{{socialPositions.length}}">
     <text class="section-title">社会职务</text>
-    <view class="empty-line" wx:if="{{socialPositions.length === 0}}">暂无社会职务</view>
-    <view class="experience-item" wx:for="{{socialPositions}}" wx:key="index"><text class="experience-text">{{item.organization || '-'}} {{item.position || ''}}</text></view>
+    <view class="list-item" wx:for="{{socialPositions}}" wx:key="index">
+      <text class="list-title">{{item.organization}}</text>
+      <text wx:if="{{item.position}}" class="list-sub">{{item.position}}</text>
+    </view>
   </view>
 
-  <view class="section">
-    <text class="section-title">其他</text>
-    <view class="info-item"><text class="label">标签</text><text class="value">{{card.tags || '-'}}</text></view>
-    <view class="info-item"><text class="label">备注</text><text class="value">{{card.remark || '-'}}</text></view>
-  </view>
-
-  <view class="actions" wx:if="{{canEdit || canSetVisibility || canDelete}}">
-    <view class="action-button primary" wx:if="{{canEdit}}" bindtap="onEditCard"><text>编辑</text></view>
-    <view class="action-button" wx:if="{{canSetVisibility}}" bindtap="onSetVisibility"><text>可见性</text></view>
-    <view class="action-button muted" wx:if="{{canDelete}}" bindtap="onDeleteCard"><text>删除</text></view>
-  </view>
-
-  <view class="confirm-mask" wx:if="{{showConfirm}}" bindtap="closeConfirm"></view>
-  <view class="confirm-layer" wx:if="{{showConfirm}}">
-    <text class="confirm-title">删除名片</text>
-    <text class="confirm-text">删除是低频操作。确定删除这张名片吗？</text>
-    <view class="confirm-actions"><view class="confirm-btn cancel" bindtap="closeConfirm">取消</view><view class="confirm-btn ok" bindtap="confirmDelete">确认删除</view></view>
+  <!-- 备注 -->
+  <view class="section" wx:if="{{card.remark}}">
+    <text class="section-title">备注</text>
+    <text class="remark-text">{{card.remark}}</text>
   </view>
 </view>
