@@ -1,7 +1,9 @@
 import { getCard, createCard, updateCard, uploadImage } from '../../utils/api';
 const regionData = require('../../utils/regionData');
 
-const LABELS = { phone: regionData.PHONE_LABELS, email: regionData.EMAIL_LABELS, address: regionData.ADDRESS_LABELS };
+const PHONE_LABELS = ['手机', '工作', '家庭', '公司', '学校', '快递', '传真', '其他', '自定义'];
+const EMAIL_LABELS = ['工作', '个人', '学校', '其他', '自定义'];
+const ADDRESS_LABELS = ['家庭', '公司', '学校', '其他', '自定义'];
 
 function emptyEntry(labelList) {
   return { label: labelList[0], value: '' };
@@ -21,26 +23,29 @@ function arr(v, fallback = []) {
   return fallback;
 }
 function normalize(card = {}) {
-  // 标准化 phoneEntries：从新版 {label, value} 或旧版字符串数组转来
   let phoneEntries = arr(card.phones, []);
   if (phoneEntries.length && typeof phoneEntries[0] === 'string') {
-    phoneEntries = phoneEntries.filter(Boolean).map(v => ({ label: LABELS.phone[0], value: v }));
+    phoneEntries = phoneEntries.filter(Boolean).map(v => ({ label: PHONE_LABELS[0], value: v }));
   } else if (!phoneEntries.length && card.phone) {
-    phoneEntries = [{ label: LABELS.phone[0], value: card.phone }];
+    phoneEntries = [{ label: PHONE_LABELS[0], value: card.phone }];
   }
-  if (!phoneEntries.length) phoneEntries = [emptyEntry(LABELS.phone)];
-
+  if (!phoneEntries.length) phoneEntries = [emptyEntry(PHONE_LABELS)];
   let emailEntries = arr(card.emails, []);
   if (emailEntries.length && typeof emailEntries[0] === 'string') {
-    emailEntries = emailEntries.filter(Boolean).map(v => ({ label: LABELS.email[0], value: v }));
+    emailEntries = emailEntries.filter(Boolean).map(v => ({ label: EMAIL_LABELS[0], value: v }));
   } else if (!emailEntries.length && card.email) {
-    emailEntries = [{ label: LABELS.email[0], value: card.email }];
+    emailEntries = [{ label: EMAIL_LABELS[0], value: card.email }];
   }
-  if (!emailEntries.length) emailEntries = [emptyEntry(LABELS.email)];
-
+  if (!emailEntries.length) emailEntries = [emptyEntry(EMAIL_LABELS)];
   let addressEntries = arr(card.addresses, []);
   if (!addressEntries.length) addressEntries = [];
-
+  // 预计算省市区列表
+  addressEntries = addressEntries.map(e => {
+    const provinceId = regionData.PROVINCES.find(p => p.name === e.province)?.id;
+    const _cities = provinceId ? regionData.getCityNames(provinceId) : [];
+    const _districts = (provinceId && e.city) ? regionData.getDistricts(provinceId, e.city) : [];
+    return { ...e, _cities, _districts };
+  });
   return {
     ...emptyCard(), ...card,
     phoneEntries,
@@ -67,11 +72,10 @@ Page({
     card: emptyCard(),
     genders: [{ value: '', label: '未设置' }, { value: 'male', label: '男' }, { value: 'female', label: '女' }],
     marriages: [{ value: '', label: '未设置' }, { value: '未婚', label: '未婚' }, { value: '已婚', label: '已婚' }, { value: '其他', label: '其他' }],
-    phoneLabels: LABELS.phone,
-    emailLabels: LABELS.email,
-    addressLabels: LABELS.address,
+    phoneLabels: PHONE_LABELS,
+    emailLabels: EMAIL_LABELS,
+    addressLabels: ADDRESS_LABELS,
     provinces: regionData.PROVINCES.map(p => p.name),
-    provinceIdx: -1, cityIdx: -1, districtIdx: -1,
   },
 
   onLoad(options) {
@@ -111,41 +115,48 @@ Page({
   },
 
   // ===== 电话 =====
-  addPhoneEntry() { this.setData({ 'card.phoneEntries': [...this.data.card.phoneEntries, emptyEntry(LABELS.phone)] }); },
-  removePhoneEntry(e) { const a = [...this.data.card.phoneEntries]; a.splice(e.currentTarget.dataset.index, 1); this.setData({ 'card.phoneEntries': a.length ? a : [emptyEntry(LABELS.phone)] }); },
+  addPhoneEntry() { this.setData({ 'card.phoneEntries': [...this.data.card.phoneEntries, emptyEntry(PHONE_LABELS)] }); },
+  removePhoneEntry(e) { const a = [...this.data.card.phoneEntries]; a.splice(e.currentTarget.dataset.index, 1); this.setData({ 'card.phoneEntries': a.length ? a : [emptyEntry(PHONE_LABELS)] }); },
   onPhoneValue(e) { const a = [...this.data.card.phoneEntries]; a[e.currentTarget.dataset.index].value = e.detail.value; this.setData({ 'card.phoneEntries': a }); },
   onPhoneLabelChange(e) {
     const idx = e.currentTarget.dataset.index;
     const pickerIdx = parseInt(e.detail.value);
+    let label = PHONE_LABELS[pickerIdx] || PHONE_LABELS[0];
+    if (label === '自定义') label = '';
     const a = [...this.data.card.phoneEntries];
-    a[idx].label = LABELS.phone[pickerIdx] || LABELS.phone[0];
+    a[idx].label = label;
     this.setData({ 'card.phoneEntries': a });
   },
 
   // ===== 邮箱 =====
-  addEmailEntry() { this.setData({ 'card.emailEntries': [...this.data.card.emailEntries, emptyEntry(LABELS.email)] }); },
-  removeEmailEntry(e) { const a = [...this.data.card.emailEntries]; a.splice(e.currentTarget.dataset.index, 1); this.setData({ 'card.emailEntries': a.length ? a : [emptyEntry(LABELS.email)] }); },
+  addEmailEntry() { this.setData({ 'card.emailEntries': [...this.data.card.emailEntries, emptyEntry(EMAIL_LABELS)] }); },
+  removeEmailEntry(e) { const a = [...this.data.card.emailEntries]; a.splice(e.currentTarget.dataset.index, 1); this.setData({ 'card.emailEntries': a.length ? a : [emptyEntry(EMAIL_LABELS)] }); },
   onEmailValue(e) { const a = [...this.data.card.emailEntries]; a[e.currentTarget.dataset.index].value = e.detail.value; this.setData({ 'card.emailEntries': a }); },
   onEmailLabelChange(e) {
     const idx = e.currentTarget.dataset.index;
     const pickerIdx = parseInt(e.detail.value);
+    let label = EMAIL_LABELS[pickerIdx] || EMAIL_LABELS[0];
+    if (label === '自定义') label = '';
     const a = [...this.data.card.emailEntries];
-    a[idx].label = LABELS.email[pickerIdx] || LABELS.email[0];
+    a[idx].label = label;
     this.setData({ 'card.emailEntries': a });
   },
 
   // ===== 地址 =====
   addAddressEntry() {
     const a = [...this.data.card.addressEntries];
-    a.push({ label: LABELS.address[0], province: '', city: '', district: '', detail: '' });
+    if (a.length >= 5) return;
+    a.push({ label: ADDRESS_LABELS[0], province: '', city: '', district: '', detail: '', _cities: [], _districts: [] });
     this.setData({ 'card.addressEntries': a });
   },
   removeAddressEntry(e) { const a = [...this.data.card.addressEntries]; a.splice(e.currentTarget.dataset.index, 1); this.setData({ 'card.addressEntries': a }); },
   onAddressLabelChange(e) {
     const idx = e.currentTarget.dataset.index;
     const pickerIdx = parseInt(e.detail.value);
+    let label = ADDRESS_LABELS[pickerIdx] || ADDRESS_LABELS[0];
+    if (label === '自定义') label = '';
     const a = [...this.data.card.addressEntries];
-    a[idx].label = LABELS.address[pickerIdx] || LABELS.address[0];
+    a[idx].label = label;
     this.setData({ 'card.addressEntries': a });
   },
   onAddressDetail(e) { const a = [...this.data.card.addressEntries]; a[e.currentTarget.dataset.index].detail = e.detail.value; this.setData({ 'card.addressEntries': a }); },
@@ -153,11 +164,14 @@ Page({
     const idx = e.currentTarget.dataset.index;
     const pi = parseInt(e.detail.value);
     const provinceName = this.data.provinces[pi] || '';
+    const provinceId = regionData.PROVINCES.find(p => p.name === provinceName)?.id;
     const a = [...this.data.card.addressEntries];
     a[idx].province = provinceName;
     a[idx].city = '';
     a[idx].district = '';
-    this.setData({ [`card.addressEntries`]: a });
+    a[idx]._cities = provinceId ? regionData.getCityNames(provinceId) : [];
+    a[idx]._districts = [];
+    this.setData({ 'card.addressEntries': a });
   },
   onAddressCityChange(e) {
     const idx = e.currentTarget.dataset.index;
@@ -170,17 +184,17 @@ Page({
     const a = [...this.data.card.addressEntries];
     a[idx].city = cityName;
     a[idx].district = '';
-    this.setData({ [`card.addressEntries`]: a });
+    a[idx]._districts = regionData.getDistricts(provinceId, cityName);
+    this.setData({ 'card.addressEntries': a });
   },
   onAddressDistrictChange(e) {
     const idx = e.currentTarget.dataset.index;
     const entry = this.data.card.addressEntries[idx];
-    const provinceId = regionData.PROVINCES.find(p => p.name === entry.province)?.id;
-    const districts = provinceId ? regionData.getDistricts(provinceId, entry.city) : [];
+    const districts = entry._districts || [];
     const di = parseInt(e.detail.value);
     const a = [...this.data.card.addressEntries];
     a[idx].district = districts[di] || '';
-    this.setData({ [`card.addressEntries`]: a });
+    this.setData({ 'card.addressEntries': a });
   },
 
   // ===== 教育 =====
@@ -192,11 +206,6 @@ Page({
   addWorkExperience() { this.setData({ 'card.workExperience': [...this.data.card.workExperience, { startYear: '', endYear: '', company: '', position: '' }] }); },
   removeWorkExperience(e) { const a = [...this.data.card.workExperience]; a.splice(e.currentTarget.dataset.index, 1); this.setData({ 'card.workExperience': a }); },
   setWorkField(e) { const a = [...this.data.card.workExperience]; a[e.currentTarget.dataset.index][e.currentTarget.dataset.field] = e.detail.value; this.setData({ 'card.workExperience': a }); },
-
-  // ===== 社会职务 =====
-  addSocialPosition() { this.setData({ 'card.socialPositions': [...this.data.card.socialPositions, { organization: '', position: '' }] }); },
-  removeSocialPosition(e) { const a = [...this.data.card.socialPositions]; a.splice(e.currentTarget.dataset.index, 1); this.setData({ 'card.socialPositions': a }); },
-  setSocialField(e) { const a = [...this.data.card.socialPositions]; a[e.currentTarget.dataset.index][e.currentTarget.dataset.field] = e.detail.value; this.setData({ 'card.socialPositions': a }); },
 
   // ===== 提交 =====
   async onSubmit() {

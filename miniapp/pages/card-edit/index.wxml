@@ -1,138 +1,165 @@
 <view class="container">
-  <!-- 基本信息 -->
-  <view class="section">
-    <text class="section-title">基本信息</text>
-    <view class="avatar-uploader" bindtap="chooseAvatar">
-      <image wx:if="{{card.avatar}}" class="avatar-preview" src="{{card.avatar}}" mode="aspectFill" />
-      <view wx:else class="avatar-empty"><text class="plus">+</text><text>上传照片</text></view>
+  <!-- 头像 + 姓名 (Google风格头部) -->
+  <view class="g-header">
+    <view class="g-avatar-wrap" bindtap="chooseAvatar">
+      <image wx:if="{{card.avatar}}" class="g-avatar-img" src="{{card.avatar}}" mode="aspectFill" />
+      <view wx:else class="g-avatar-placeholder">
+        <text class="g-avatar-icon">📷</text>
+      </view>
+      <view class="g-avatar-overlay">
+        <text class="g-camera-icon">📷</text>
+      </view>
     </view>
-    <view class="form-item"><text class="label">姓名 *</text><input class="input" value="{{card.name}}" data-field="name" bindinput="setField" placeholder="请输入姓名" /></view>
-    <view class="form-item"><text class="label">性别</text><picker mode="selector" range="{{genders}}" range-key="label" bindchange="onGenderChange"><view class="picker">{{card.gender || '未设置'}}</view></picker></view>
-    <view class="form-item"><text class="label">公开</text><switch checked="{{card.isPublic}}" bindchange="onPublicChange" /></view>
+    <view class="g-name-area">
+      <input class="g-name-input" value="{{card.name}}" data-field="name" bindinput="setField" placeholder="姓名" />
+    </view>
   </view>
 
   <!-- 工作信息 -->
-  <view class="section">
-    <text class="section-title">工作信息</text>
-    <view class="form-item"><text class="label">工作单位</text><input class="input" value="{{card.company}}" data-field="company" bindinput="setField" /></view>
-    <view class="form-item"><text class="label">职位</text><input class="input" value="{{card.position}}" data-field="position" bindinput="setField" /></view>
-    <view class="form-item"><text class="label">行业</text><input class="input" value="{{card.industry}}" data-field="industry" bindinput="setField" /></view>
-    <view class="form-item"><text class="label">领域</text><input class="input" value="{{card.field}}" data-field="field" bindinput="setField" /></view>
-  </view>
-
-  <!-- 联系方式 - 电话 -->
-  <view class="section">
-    <view class="section-head"><text class="section-title no-border">电话</text><view class="circle-add" bindtap="addPhoneEntry">+</view></view>
-    <view class="label-row" wx:for="{{card.phoneEntries}}" wx:key="index">
-      <picker mode="selector" range="{{phoneLabels}}" bindchange="onPhoneLabelChange" data-index="{{index}}">
-        <view class="label-picker">{{item.label}}</view>
-      </picker>
-      <input class="input phone-input" value="{{item.value}}" data-index="{{index}}" bindinput="onPhoneValue" placeholder="手机号码" type="text" />
-      <view class="small-btn muted" data-index="{{index}}" bindtap="removePhoneEntry">✕</view>
+  <view class="g-section">
+    <view class="g-section-header">
+      <text class="g-section-title">工作</text>
     </view>
+    <view class="g-field-row"><text class="g-field-label">公司</text><input class="g-field-input" value="{{card.company}}" data-field="company" bindinput="setField" placeholder="添加公司" /></view>
+    <view class="g-field-row"><text class="g-field-label">职位</text><input class="g-field-input" value="{{card.position}}" data-field="position" bindinput="setField" placeholder="添加职位" /></view>
+    <view class="g-field-row"><text class="g-field-label">行业</text><input class="g-field-input" value="{{card.industry}}" data-field="industry" bindinput="setField" placeholder="添加行业" /></view>
   </view>
 
-  <!-- 联系方式 - 邮箱 -->
-  <view class="section">
-    <view class="section-head"><text class="section-title no-border">邮箱</text><view class="circle-add" bindtap="addEmailEntry">+</view></view>
-    <view class="label-row" wx:for="{{card.emailEntries}}" wx:key="index">
-      <picker mode="selector" range="{{emailLabels}}" bindchange="onEmailLabelChange" data-index="{{index}}">
-        <view class="label-picker">{{item.label}}</view>
-      </picker>
-      <input class="input phone-input" value="{{item.value}}" data-index="{{index}}" bindinput="onEmailValue" placeholder="邮箱地址" />
-      <view class="small-btn muted" data-index="{{index}}" bindtap="removeEmailEntry">✕</view>
+  <!-- 电话 (Google风格: label + value + delete, 底部添加链接) -->
+  <view class="g-section">
+    <view class="g-section-header">
+      <text class="g-section-title">电话</text>
     </view>
+    <view class="g-entry-list">
+      <view class="g-entry-row" wx:for="{{card.phoneEntries}}" wx:key="index">
+        <picker mode="selector" range="{{phoneLabels}}" bindchange="onPhoneLabelChange" data-index="{{index}}">
+          <view class="g-label-pill">{{item.label || phoneLabels[0]}}</view>
+        </picker>
+        <input class="g-entry-input" value="{{item.value}}" data-index="{{index}}" bindinput="onPhoneValue" placeholder="电话号码" type="text" />
+        <view class="g-entry-del" data-index="{{index}}" bindtap="removePhoneEntry">✕</view>
+      </view>
+    </view>
+    <view class="g-add-link" bindtap="addPhoneEntry">+ 添加电话</view>
   </view>
 
-  <!-- 其他联系方式 -->
-  <view class="section">
-    <text class="section-title">其他联系方式</text>
-    <view class="form-item"><text class="label">微信</text><input class="input" value="{{card.wechat}}" data-field="wechat" bindinput="setField" /></view>
-    <view class="form-item"><text class="label">QQ</text><input class="input" value="{{card.qq}}" data-field="qq" bindinput="setField" /></view>
+  <!-- 邮箱 -->
+  <view class="g-section">
+    <view class="g-section-header">
+      <text class="g-section-title">邮箱</text>
+    </view>
+    <view class="g-entry-list">
+      <view class="g-entry-row" wx:for="{{card.emailEntries}}" wx:key="index">
+        <picker mode="selector" range="{{emailLabels}}" bindchange="onEmailLabelChange" data-index="{{index}}">
+          <view class="g-label-pill">{{item.label || emailLabels[0]}}</view>
+        </picker>
+        <input class="g-entry-input" value="{{item.value}}" data-index="{{index}}" bindinput="onEmailValue" placeholder="邮箱地址" />
+        <view class="g-entry-del" data-index="{{index}}" bindtap="removeEmailEntry">✕</view>
+      </view>
+    </view>
+    <view class="g-add-link" bindtap="addEmailEntry">+ 添加邮箱</view>
   </view>
 
-  <!-- 地址 -->
-  <view class="section">
-    <view class="section-head"><text class="section-title no-border">地址</text><view class="circle-add" bindtap="addAddressEntry">+</view></view>
-    <view class="address-card" wx:for="{{card.addressEntries}}" wx:key="index">
-      <view class="addr-header">
-        <picker mode="selector" range="{{addressLabels}}" bindchange="onAddressLabelChange" data-index="{{index}}">
-          <view class="label-picker addr-label">{{item.label}}</view>
-        </picker>
-        <view class="small-btn muted" data-index="{{index}}" bindtap="removeAddressEntry">✕</view>
-      </view>
-      <view class="addr-row">
-        <picker mode="selector" range="{{provinces}}" bindchange="onAddressProvinceChange" data-index="{{index}}">
-          <view class="picker addr-picker">{{item.province || '选择省'}}</view>
-        </picker>
-      </view>
-      <view class="addr-row">
-        <picker mode="selector" range="{{provinces[provinceIdx] && provinces[provinceIdx].cities || []}}" bindchange="onAddressCityChange" data-index="{{index}}" wx:if="{{item.province}}">
-          <view class="picker addr-picker">{{item.city || '选择市'}}</view>
-        </picker>
-        <input class="input" wx:else placeholder="先选择省" disabled />
-      </view>
-      <view class="addr-row" wx:if="{{item.province && item.city}}">
-        <view class="addr-sub-row">
-          <picker mode="selector" range="{{item._districts || []}}" bindchange="onAddressDistrictChange" data-index="{{index}}">
-            <view class="picker addr-picker short">{{item.district || '区/县'}}</view>
+  <!-- 微信 / QQ 等 -->
+  <view class="g-section">
+    <view class="g-section-header">
+      <text class="g-section-title">即时通讯</text>
+    </view>
+    <view class="g-field-row"><text class="g-field-label">微信</text><input class="g-field-input" value="{{card.wechat}}" data-field="wechat" bindinput="setField" placeholder="添加微信" /></view>
+    <view class="g-field-row"><text class="g-field-label">QQ</text><input class="g-field-input" value="{{card.qq}}" data-field="qq" bindinput="setField" placeholder="添加 QQ" /></view>
+  </view>
+
+  <!-- 地址 (Google风格: label + 省市区三级 + 详细地址) -->
+  <view class="g-section">
+    <view class="g-section-header">
+      <text class="g-section-title">地址</text>
+    </view>
+    <view class="g-entry-list">
+      <view class="g-addr-card" wx:for="{{card.addressEntries}}" wx:key="index">
+        <view class="g-addr-top">
+          <picker mode="selector" range="{{addressLabels}}" bindchange="onAddressLabelChange" data-index="{{index}}">
+            <view class="g-label-pill">{{item.label || addressLabels[0]}}</view>
           </picker>
-          <input class="input addr-detail" value="{{item.detail}}" data-index="{{index}}" bindinput="onAddressDetail" placeholder="详细地址" />
+          <view class="g-entry-del" data-index="{{index}}" bindtap="removeAddressEntry">✕</view>
+        </view>
+        <view class="g-addr-body">
+          <view class="g-addr-line">
+            <picker mode="selector" range="{{provinces}}" bindchange="onAddressProvinceChange" data-index="{{index}}">
+              <view class="g-addr-select {{item.province ? '' : 'g-placeholder'}}">{{item.province || '省/直辖市'}}</view>
+            </picker>
+            <picker mode="selector" range="{{item._cities}}" bindchange="onAddressCityChange" data-index="{{index}}" wx:if="{{item.province}}">
+              <view class="g-addr-select {{item.city ? '' : 'g-placeholder'}}">{{item.city || '城市'}}</view>
+            </picker>
+            <picker wx:if="{{item.city}}" mode="selector" range="{{item._districts}}" bindchange="onAddressDistrictChange" data-index="{{index}}">
+              <view class="g-addr-select {{item.district ? '' : 'g-placeholder'}}">{{item.district || '区/县'}}</view>
+            </picker>
+          </view>
+          <input class="g-addr-detail" value="{{item.detail}}" data-index="{{index}}" bindinput="onAddressDetail" placeholder="详细地址" />
         </view>
       </view>
-      <input class="input addr-only-detail" wx:else value="{{item.detail}}" data-index="{{index}}" bindinput="onAddressDetail" placeholder="详细地址" />
     </view>
-    <view class="empty-tip" wx:if="{{card.addressEntries.length === 0}}" bindtap="addAddressEntry">+ 添加地址</view>
+    <view class="g-add-link" bindtap="addAddressEntry" wx:if="{{card.addressEntries.length < 5}}">+ 添加地址</view>
   </view>
 
   <!-- 生日与身份 -->
-  <view class="section">
-    <text class="section-title">生日与身份</text>
-    <view class="form-item"><text class="label">阳历生日</text><picker mode="date" value="{{card.solarBirthday}}" bindchange="onSolarBirthdayChange"><view class="picker">{{card.solarBirthday || '选择日期'}}</view></picker></view>
-    <view class="form-item"><text class="label">农历生日</text><input class="input" value="{{card.lunarBirthday}}" data-field="lunarBirthday" bindinput="setField" placeholder="如 腊月初八" /></view>
-    <view class="form-item"><text class="label">民族</text><input class="input" value="{{card.ethnicity}}" data-field="ethnicity" bindinput="setField" /></view>
-    <view class="form-item"><text class="label">籍贯</text><input class="input" value="{{card.birthplace}}" data-field="birthplace" bindinput="setField" /></view>
-    <view class="form-item"><text class="label">婚姻</text><picker mode="selector" range="{{marriages}}" range-key="label" bindchange="onMarriageChange"><view class="picker">{{card.maritalStatus || '未设置'}}</view></picker></view>
+  <view class="g-section">
+    <view class="g-section-header">
+      <text class="g-section-title">生日与身份</text>
+    </view>
+    <view class="g-field-row"><text class="g-field-label">阳历生日</text><picker mode="date" value="{{card.solarBirthday}}" bindchange="onSolarBirthdayChange"><view class="g-field-input g-picker-text">{{card.solarBirthday || '添加生日'}}</view></picker></view>
+    <view class="g-field-row"><text class="g-field-label">农历生日</text><input class="g-field-input" value="{{card.lunarBirthday}}" data-field="lunarBirthday" bindinput="setField" placeholder="如 腊月初八" /></view>
+    <view class="g-field-row"><text class="g-field-label">性别</text><picker mode="selector" range="{{genders}}" range-key="label" bindchange="onGenderChange"><view class="g-field-input g-picker-text">{{card.gender ? (card.gender === 'male' ? '男' : card.gender === 'female' ? '女' : card.gender) : '未设置'}}</view></picker></view>
+    <view class="g-field-row"><text class="g-field-label">婚姻</text><picker mode="selector" range="{{marriages}}" range-key="label" bindchange="onMarriageChange"><view class="g-field-input g-picker-text">{{card.maritalStatus || '未设置'}}</view></picker></view>
   </view>
 
   <!-- 教育经历 -->
-  <view class="section">
-    <view class="section-head"><text class="section-title no-border">教育经历</text><view class="circle-add" bindtap="addEducation">+</view></view>
-    <view class="experience-form" wx:for="{{card.educationBackground}}" wx:key="index">
-      <view class="year-row"><input class="input" placeholder="开始年" value="{{item.startYear}}" data-index="{{index}}" data-field="startYear" bindinput="setEducationField" /><input class="input" placeholder="结束年" value="{{item.endYear}}" data-index="{{index}}" data-field="endYear" bindinput="setEducationField" /></view>
-      <input class="input" placeholder="学校" value="{{item.school}}" data-index="{{index}}" data-field="school" bindinput="setEducationField" />
-      <input class="input" placeholder="学历/学位" value="{{item.degree}}" data-index="{{index}}" data-field="degree" bindinput="setEducationField" />
-      <view class="remove-button" data-index="{{index}}" bindtap="removeEducation">删除</view>
+  <view class="g-section">
+    <view class="g-section-header">
+      <text class="g-section-title">教育经历</text>
+      <view class="g-add-icon" bindtap="addEducation">+</view>
+    </view>
+    <view class="g-exp-card" wx:for="{{card.educationBackground}}" wx:key="index">
+      <view class="g-exp-header">
+        <text class="g-exp-index">#{{index+1}}</text>
+        <view class="g-entry-del" data-index="{{index}}" bindtap="removeEducation">✕</view>
+      </view>
+      <input class="g-exp-input" placeholder="学校" value="{{item.school}}" data-index="{{index}}" data-field="school" bindinput="setEducationField" />
+      <view class="g-exp-year">
+        <input class="g-exp-input half" placeholder="开始年" value="{{item.startYear}}" data-index="{{index}}" data-field="startYear" bindinput="setEducationField" />
+        <input class="g-exp-input half" placeholder="结束年" value="{{item.endYear}}" data-index="{{index}}" data-field="endYear" bindinput="setEducationField" />
+      </view>
+      <input class="g-exp-input" placeholder="学历/学位" value="{{item.degree}}" data-index="{{index}}" data-field="degree" bindinput="setEducationField" />
     </view>
   </view>
 
   <!-- 工作经历 -->
-  <view class="section">
-    <view class="section-head"><text class="section-title no-border">工作经历</text><view class="circle-add" bindtap="addWorkExperience">+</view></view>
-    <view class="experience-form" wx:for="{{card.workExperience}}" wx:key="index">
-      <view class="year-row"><input class="input" placeholder="开始年" value="{{item.startYear}}" data-index="{{index}}" data-field="startYear" bindinput="setWorkField" /><input class="input" placeholder="结束年" value="{{item.endYear}}" data-index="{{index}}" data-field="endYear" bindinput="setWorkField" /></view>
-      <input class="input" placeholder="公司/单位" value="{{item.company}}" data-index="{{index}}" data-field="company" bindinput="setWorkField" />
-      <input class="input" placeholder="任职" value="{{item.position}}" data-index="{{index}}" data-field="position" bindinput="setWorkField" />
-      <view class="remove-button" data-index="{{index}}" bindtap="removeWorkExperience">删除</view>
+  <view class="g-section">
+    <view class="g-section-header">
+      <text class="g-section-title">工作经历</text>
+      <view class="g-add-icon" bindtap="addWorkExperience">+</view>
     </view>
-  </view>
-
-  <!-- 社会职务 -->
-  <view class="section">
-    <view class="section-head"><text class="section-title no-border">社会职务</text><view class="circle-add" bindtap="addSocialPosition">+</view></view>
-    <view class="experience-form" wx:for="{{card.socialPositions}}" wx:key="index">
-      <input class="input" placeholder="机构" value="{{item.organization}}" data-index="{{index}}" data-field="organization" bindinput="setSocialField" />
-      <input class="input" placeholder="任职" value="{{item.position}}" data-index="{{index}}" data-field="position" bindinput="setSocialField" />
-      <view class="remove-button" data-index="{{index}}" bindtap="removeSocialPosition">删除</view>
+    <view class="g-exp-card" wx:for="{{card.workExperience}}" wx:key="index">
+      <view class="g-exp-header">
+        <text class="g-exp-index">#{{index+1}}</text>
+        <view class="g-entry-del" data-index="{{index}}" bindtap="removeWorkExperience">✕</view>
+      </view>
+      <input class="g-exp-input" placeholder="公司" value="{{item.company}}" data-index="{{index}}" data-field="company" bindinput="setWorkField" />
+      <input class="g-exp-input" placeholder="职位" value="{{item.position}}" data-index="{{index}}" data-field="position" bindinput="setWorkField" />
+      <view class="g-exp-year">
+        <input class="g-exp-input half" placeholder="开始年" value="{{item.startYear}}" data-index="{{index}}" data-field="startYear" bindinput="setWorkField" />
+        <input class="g-exp-input half" placeholder="结束年" value="{{item.endYear}}" data-index="{{index}}" data-field="endYear" bindinput="setWorkField" />
+      </view>
     </view>
   </view>
 
   <!-- 其他 -->
-  <view class="section">
-    <text class="section-title">其他</text>
-    <view class="form-item"><text class="label">标签</text><input class="input" value="{{card.tags}}" data-field="tags" bindinput="setField" placeholder="多个标签可用逗号隔开" /></view>
-    <textarea class="textarea block" value="{{card.remark}}" data-field="remark" bindinput="setField" placeholder="备注" />
+  <view class="g-section">
+    <view class="g-section-header">
+      <text class="g-section-title">备注</text>
+    </view>
+    <textarea class="g-remark-input" value="{{card.remark}}" data-field="remark" bindinput="setField" placeholder="添加备注" />
   </view>
 
-  <view class="submit-button" bindtap="onSubmit">保存</view>
+  <view class="g-save-bar">
+    <view class="g-save-btn" bindtap="onSubmit">保存</view>
+  </view>
 </view>

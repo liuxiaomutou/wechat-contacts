@@ -1,42 +1,70 @@
-.container { background:#f5f6f7; min-height:100vh; padding:24rpx 0 120rpx; }
-.section { background:#fff; margin:0 24rpx 24rpx; padding:28rpx; border-radius:18rpx; box-shadow:0 4rpx 16rpx rgba(0,0,0,.03); }
-.section-title { display:block; font-size:31rpx; font-weight:700; color:#222; margin-bottom:20rpx; padding-bottom:14rpx; border-bottom:1rpx solid #eee; }
-.section-title.no-border { margin:0; padding:0; border:0; }
-.section-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20rpx; }
-.section-head.mt { margin-top:22rpx; }
-.circle-add { width:56rpx; height:56rpx; border-radius:50%; background:#07c160; color:#fff; display:flex; align-items:center; justify-content:center; font-size:38rpx; font-weight:500; }
-.avatar-uploader { width:180rpx; height:180rpx; border-radius:18rpx; border:2rpx dashed #cfd5dc; margin:0 auto 28rpx; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#fafafa; }
-.avatar-preview { width:100%; height:100%; }
-.avatar-empty { color:#07c160; display:flex; flex-direction:column; align-items:center; font-size:24rpx; }
-.avatar-empty .plus { font-size:56rpx; line-height:60rpx; }
-.year-row { display:flex; gap:12rpx; }
-.form-item { display:flex; align-items:center; margin-bottom:18rpx; }
-.label { width:150rpx; flex-shrink:0; font-size:27rpx; color:#666; }
-.input { flex:1; min-height:72rpx; font-size:28rpx; padding:0 18rpx; border:1rpx solid #e5e7eb; border-radius:14rpx; background:#fff; box-sizing:border-box; }
-.textarea { width:100%; min-height:120rpx; font-size:28rpx; padding:18rpx; border:1rpx solid #e5e7eb; border-radius:14rpx; background:#fff; box-sizing:border-box; margin-bottom:14rpx; }
-.textarea.block { margin-top:8rpx; }
-.picker { flex:1; min-height:72rpx; line-height:72rpx; padding:0 18rpx; border:1rpx solid #e5e7eb; border-radius:14rpx; color:#333; }
-.array-row { display:flex; gap:12rpx; align-items:center; margin-bottom:14rpx; }
-.small-btn { width:76rpx; height:64rpx; border-radius:32rpx; display:flex; align-items:center; justify-content:center; font-size:26rpx; }
-.small-btn.muted { background:#eef0f2; color:#777; }
-.add-button { display:flex; align-items:center; justify-content:center; min-height:68rpx; margin:14rpx 0 20rpx; border:2rpx dashed #cfd5dc; border-radius:14rpx; color:#07c160; font-size:28rpx; background:#fafafa; }
-.experience-form { border:1rpx solid #eef0f2; border-radius:16rpx; padding:18rpx; margin-bottom:18rpx; background:#f8fafc; }
-.experience-form .input { width:100%; margin-bottom:14rpx; }
-.remove-button { height:64rpx; border-radius:32rpx; background:#eef0f2; color:#777; display:flex; align-items:center; justify-content:center; font-size:26rpx; margin-top:4rpx; }
-.submit-button { position:fixed; left:24rpx; right:24rpx; bottom:34rpx; height:82rpx; line-height:82rpx; background:#07c160; color:#fff; text-align:center; border-radius:44rpx; font-size:31rpx; font-weight:700; box-shadow:0 8rpx 24rpx rgba(7,193,96,.28); }
+.container { background:#f5f6f7; min-height:100vh; padding-bottom:140rpx; }
 
-/* 标签 + 值行 */
-.label-row { display:flex; align-items:center; gap:10rpx; margin-bottom:14rpx; }
-.label-picker { min-width:96rpx; height:64rpx; line-height:64rpx; padding:0 12rpx; border:1rpx solid #07c160; border-radius:10rpx; color:#07c160; font-size:26rpx; text-align:center; background:#f0faf0; }
+/* ===== Google 风格头像 ===== */
+.g-header { background:#fff; padding:36rpx 28rpx 28rpx; display:flex; align-items:center; gap:28rpx; }
+.g-avatar-wrap { position:relative; width:140rpx; height:140rpx; border-radius:50%; flex-shrink:0; overflow:hidden; background:#f0f0f0; }
+.g-avatar-img { width:100%; height:100%; }
+.g-avatar-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:48rpx; }
+.g-avatar-overlay { position:absolute; inset:0; background:rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .2s; border-radius:50%; }
+.g-avatar-wrap:active .g-avatar-overlay { opacity:1; }
+.g-camera-icon { font-size:40rpx; color:#fff; }
+.g-name-area { flex:1; }
+.g-name-input { width:100%; font-size:36rpx; font-weight:600; color:#222; background:transparent; border:none; padding:8rpx 0; min-height:52rpx; }
+.g-name-input::placeholder { color:#bbb; }
 
-/* 地址卡片 */
-.address-card { border:1rpx solid #eef0f2; border-radius:16rpx; padding:16rpx; margin-bottom:16rpx; background:#f8fafc; }
-.addr-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12rpx; }
-.addr-label { min-width:auto; height:56rpx; line-height:56rpx; padding:0 16rpx; border-radius:28rpx; }
-.addr-row { margin-bottom:10rpx; display:flex; gap:10rpx; }
-.addr-sub-row { display:flex; gap:10rpx; width:100%; }
-.addr-picker { flex:1; }
-.addr-picker.short { flex:0 0 180rpx; min-width:180rpx; }
-.addr-detail { flex:1; }
-.addr-only-detail { width:100%; margin-top:10rpx; }
-.empty-tip { display:flex; align-items:center; justify-content:center; min-height:68rpx; border:2rpx dashed #cfd5dc; border-radius:14rpx; color:#07c160; font-size:28rpx; background:#fafafa; }
+/* ===== Google 风格分组 ===== */
+.g-section { background:#fff; margin:20rpx 0; padding:0 28rpx; }
+.g-section-header { display:flex; align-items:center; justify-content:space-between; padding:28rpx 0 4rpx; border-bottom:1rpx solid #eef0f2; }
+.g-section-title { font-size:26rpx; font-weight:600; color:#1a73e8; text-transform:uppercase; letter-spacing:.5rpx; }
+
+/* ===== 标准字段行 (label + input) ===== */
+.g-field-row { display:flex; align-items:center; min-height:88rpx; border-bottom:1rpx solid #f0f2f4; }
+.g-field-row:last-child { border-bottom:none; }
+.g-field-label { width:130rpx; flex-shrink:0; font-size:27rpx; color:#666; }
+.g-field-input { flex:1; font-size:28rpx; color:#222; background:transparent; border:none; padding:0 12rpx; min-height:72rpx; }
+.g-field-input::placeholder { color:#b0b4b8; }
+.g-picker-text { line-height:72rpx; }
+
+/* ===== Google 风格条目列表 (电话/邮箱) ===== */
+.g-entry-list { }
+.g-entry-row { display:flex; align-items:center; gap:14rpx; min-height:84rpx; border-bottom:1rpx solid #f0f2f4; }
+.g-entry-row:last-child { border-bottom:none; }
+.g-label-pill { min-width:80rpx; height:52rpx; line-height:52rpx; padding:0 16rpx; border:1rpx solid #d2e3fc; border-radius:26rpx; color:#1a73e8; font-size:24rpx; text-align:center; background:#e8f0fe; white-space:nowrap; flex-shrink:0; }
+.g-entry-input { flex:1; font-size:28rpx; color:#222; background:transparent; border:none; min-height:72rpx; padding:0 4rpx; }
+.g-entry-input::placeholder { color:#b0b4b8; }
+.g-entry-del { width:52rpx; height:52rpx; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:26rpx; color:#aaa; background:#f2f2f2; flex-shrink:0; }
+.g-entry-del:active { background:#ddd; }
+
+/* ===== 添加链接 (Google 风格: 蓝色文字在底部) ===== */
+.g-add-link { display:block; padding:22rpx 0; font-size:28rpx; color:#1a73e8; text-align:left; border-top:1rpx solid #f0f2f4; }
+.g-add-link:active { color:#0d47a1; }
+.g-add-icon { width:48rpx; height:48rpx; border-radius:50%; background:#e8f0fe; color:#1a73e8; display:flex; align-items:center; justify-content:center; font-size:32rpx; font-weight:400; }
+.g-add-icon:active { background:#d2e3fc; }
+
+/* ===== 地址卡片 ===== */
+.g-addr-card { padding:14rpx 0; border-bottom:1rpx solid #f0f2f4; }
+.g-addr-card:last-child { border-bottom:none; }
+.g-addr-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:12rpx; }
+.g-addr-body { }
+.g-addr-line { display:flex; gap:12rpx; margin-bottom:12rpx; }
+.g-addr-select { flex:1; height:60rpx; line-height:60rpx; padding:0 12rpx; border:1rpx solid #e5e7eb; border-radius:10rpx; font-size:26rpx; color:#222; text-align:center; background:#fff; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.g-addr-select.g-placeholder { color:#b0b4b8; }
+.g-addr-detail { width:100%; min-height:60rpx; font-size:26rpx; color:#222; background:transparent; border:1rpx solid #e5e7eb; border-radius:10rpx; padding:0 12rpx; box-sizing:border-box; }
+.g-addr-detail::placeholder { color:#b0b4b8; }
+
+/* ===== 经历卡片 ===== */
+.g-exp-card { border:1rpx solid #eef0f2; border-radius:12rpx; padding:18rpx; margin:14rpx 0; background:#fafbfc; }
+.g-exp-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12rpx; }
+.g-exp-index { font-size:22rpx; color:#999; font-weight:500; }
+.g-exp-input { width:100%; min-height:64rpx; font-size:27rpx; padding:0 12rpx; border:1rpx solid #e5e7eb; border-radius:10rpx; background:#fff; box-sizing:border-box; margin-bottom:10rpx; }
+.g-exp-input.half { width:48%; display:inline-block; }
+.g-exp-year { display:flex; gap:4%; }
+
+/* ===== 备注 ===== */
+.g-remark-input { width:100%; min-height:140rpx; font-size:28rpx; padding:16rpx 0; background:transparent; border:none; box-sizing:border-box; color:#222; }
+.g-remark-input::placeholder { color:#b0b4b8; }
+
+/* ===== 底部保存栏 ===== */
+.g-save-bar { position:fixed; left:0; right:0; bottom:0; padding:16rpx 28rpx 34rpx; background:#fff; border-top:1rpx solid #eef0f2; }
+.g-save-btn { height:82rpx; line-height:82rpx; background:#1a73e8; color:#fff; text-align:center; border-radius:41rpx; font-size:30rpx; font-weight:600; box-shadow:0 4rpx 16rpx rgba(26,115,232,.25); }
+.g-save-btn:active { background:#1557b0; }
