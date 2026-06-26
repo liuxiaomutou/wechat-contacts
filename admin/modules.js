@@ -89,25 +89,80 @@ async function viewCard(id) {
   function formatAddr(a) { return [a.province, a.city, a.district, a.detail].filter(Boolean).join(' '); }
   openModal('名片详情', '<div class="detail-head"><div class="avatar-lg">' + (c.avatar ? '<img src="' + escapeHtml(c.avatar) + '">' : escapeHtml((c.name||'?').slice(0,1))) + '</div><div><div class="detail-name">' + escapeHtml(c.name) + '</div><div class="detail-sub">' + escapeHtml(c.position||'') + ' ' + (c.company ? '@ '+escapeHtml(c.company) : '') + '</div><div style="margin-top:6px"><span class="badge badge-' + c.role + '">' + roleLabel(c.role) + '</span></div></div></div><div class="info-list">' + (phones.length ? '<div class="info-label">\uD83D\uDCDE 电话</div>' + renderLabeledList(phones) : '') + (emails.length ? '<div class="info-label">\uD83D\uDCE7 邮箱</div>' + renderLabeledList(emails) : '') + renderField('微信', c.wechat) + renderField('工作单位', c.company) + renderField('职位', c.position) + renderField('行业', c.industry) + renderField('领域', c.field) + renderField('性别', c.gender) + renderField('标签', c.tags) + renderField('备注', c.remark) + (addresses.length ? '<div class="info-label">\uD83D\uDCCD 地址</div>' + addresses.map(a => '<div class="info-row"><span>' + (a.label ? '<span class="mini-label">' + escapeHtml(a.label) + '</span> ' : '') + escapeHtml(formatAddr(a)) + '</span></div>').join('') : '') + '</div>' + renderArraySection('\uD83C\uDF93 教育经历', c.educationBackground, e=>'<div class="exp-item"><strong>' + escapeHtml(e.school||'') + '</strong> ' + escapeHtml(e.major||'') + ' ' + escapeHtml(e.degree||'') + '<br><small>' + escapeHtml(e.startDate||'') + ' - ' + escapeHtml(e.endDate||'') + '</small></div>') + renderArraySection('\uD83D\uDCBC 工作经历', c.workExperience, e=>'<div class="exp-item"><strong>' + escapeHtml(e.company||'') + '</strong> ' + escapeHtml(e.position||'') + ' ' + escapeHtml(e.department||'') + '<br><small>' + escapeHtml(e.startDate||'') + ' - ' + escapeHtml(e.endDate||'') + '</small><br>' + escapeHtml(e.description||'') + '</div>') + '<div class="modal-footer"><button class="btn btn-muted" onclick="closeModal()">关闭</button>' + (c.actions?.canEdit?'<button class="btn btn-primary" onclick="showCardEditor('+id+')">编辑</button>':'') + '</div>', 'large');
 }
-function cardForm(c={}) {
-  var phonesList = Array.isArray(c.phones) ? (typeof c.phones[0] === 'string' ? c.phones.filter(Boolean).map(function(x){return {label:'',value:x}}) : c.phones.filter(function(x){return x.value||x.label})) : (c.phone ? [{label:'',value:c.phone}] : []);
-  var emailsList = Array.isArray(c.emails) ? (typeof c.emails[0] === 'string' ? c.emails.filter(Boolean).map(function(x){return {label:'',value:x}}) : c.emails.filter(function(x){return x.value||x.label})) : (c.email ? [{label:'',value:c.email}] : []);
-  var addressesList = Array.isArray(c.addresses) ? c.addresses.filter(function(a){return a.province||a.detail}) : [];
-  return '<div class="form-grid"><input class="input" id="card-name" placeholder="姓名 *" value="' + escapeHtml(c.name||'') + '"><input class="input" id="card-avatar" placeholder="照片 URL" value="' + escapeHtml(c.avatar||'') + '"><input class="input" id="card-phones" placeholder="电话，多个用逗号分隔" value="' + escapeHtml(phonesList.map(function(p){return p.value}).filter(Boolean).join(',')) + '"><input class="input" id="card-phones-labels" placeholder="电话标签(同顺序逗号分隔): 工作,家庭" value="' + escapeHtml(phonesList.map(function(p){return p.label}).filter(Boolean).join(',')) + '"><input class="input" id="card-emails" placeholder="邮箱，多个用逗号分隔" value="' + escapeHtml(emailsList.map(function(e){return e.value}).filter(Boolean).join(',')) + '"><input class="input" id="card-emails-labels" placeholder="邮箱标签(同顺序逗号分隔): 工作,个人" value="' + escapeHtml(emailsList.map(function(e){return e.label}).filter(Boolean).join(',')) + '"><input class="input" id="card-company" placeholder="工作单位" value="' + escapeHtml(c.company||'') + '"><input class="input" id="card-position" placeholder="职位" value="' + escapeHtml(c.position||'') + '"><input class="input" id="card-wechat" placeholder="微信" value="' + escapeHtml(c.wechat||'') + '"><textarea class="full" id="card-addresses" placeholder=\'地址JSON: [{"label":"家庭","province":"广东省","city":"深圳市","district":"南山区","detail":"科技园"}]\'>' + escapeHtml(JSON.stringify(addressesList)) + '</textarea><textarea class="full" id="card-edu" placeholder=\'教育经历 JSON，如 [{"school":"清华","major":"计算机","degree":"本科"}]\'>' + escapeHtml(JSON.stringify(c.educationBackground||[])) + '</textarea><textarea class="full" id="card-work" placeholder=\'工作经历 JSON，如 [{"company":"腾讯","position":"总监"}]\'>' + escapeHtml(JSON.stringify(c.workExperience||[])) + '</textarea><textarea class="full" id="card-remark" placeholder="备注">' + escapeHtml(c.remark||'') + '</textarea></div>';
+// ===== 交互式名片编辑器（Google Contacts 风格）=====
+const ADMIN_LABELS = { phone: ['手机','工作','家庭','公司','学校','快递','传真','其他','自定义'], email: ['工作','个人','学校','其他','自定义'], address: ['家庭','公司','学校','其他','自定义'] };
+const ADMIN_PROVINCES = ['北京市','天津市','河北省','山西省','内蒙古自治区','辽宁省','吉林省','黑龙江省','上海市','江苏省','浙江省','安徽省','福建省','江西省','山东省','河南省','湖北省','湖南省','广东省','广西壮族自治区','海南省','重庆市','四川省','贵州省','云南省','西藏自治区','陕西省','甘肃省','青海省','宁夏回族自治区','新疆维吾尔自治区','台湾省','香港特别行政区','澳门特别行政区'];
+function renderPhoneRows(entries) {
+  if (!entries || !entries.length) entries = [{label:'手机',value:''}];
+  return entries.map(function(e,i){
+    var opts = ADMIN_LABELS.phone.map(function(l){ return '<option value="'+l+'"'+(l===e.label?' selected':'')+'>'+l+'</option>'; }).join('');
+    return '<div class="g-entry-row"><select class="g-label-select">'+opts+'</select><input class="g-entry-input" value="'+escapeHtml(e.value||'')+'" placeholder="电话号码"><button class="g-entry-del">✕</button></div>';
+  }).join('');
 }
-async function showCardEditor(id) { if (!selectedLibId && !id) return toast('请先选择名片库','error'); const c = id ? await api('/cards/'+id) : {}; openModal(id?'编辑名片':'新建名片', cardForm(c) + '<div class="modal-footer"><button class="btn btn-muted" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="saveCard(' + (id||0) + ')">保存</button></div>', 'large'); }
+function renderEmailRows(entries) {
+  if (!entries || !entries.length) entries = [{label:'工作',value:''}];
+  return entries.map(function(e,i){
+    var opts = ADMIN_LABELS.email.map(function(l){ return '<option value="'+l+'"'+(l===e.label?' selected':'')+'>'+l+'</option>'; }).join('');
+    return '<div class="g-entry-row"><select class="g-label-select">'+opts+'</select><input class="g-entry-input" value="'+escapeHtml(e.value||'')+'" placeholder="邮箱地址"><button class="g-entry-del">✕</button></div>';
+  }).join('');
+}
+function renderAddressRows(entries) {
+  if (!entries || !entries.length) return '';
+  return entries.map(function(e,i){
+    var lopts = ADMIN_LABELS.address.map(function(l){ return '<option value="'+l+'"'+(l===e.label?' selected':'')+'>'+l+'</option>'; }).join('');
+    var popts = ADMIN_PROVINCES.map(function(p){ return '<option value="'+p+'"'+(p===e.province?' selected':'')+'>'+p+'</option>'; }).join('');
+    return '<div class="g-addr-card"><div class="g-addr-top"><select class="g-label-select">'+lopts+'</select><button class="g-entry-del">✕</button></div><div class="g-addr-line"><select class="g-addr-select"><option value="">选择省/市</option>'+popts+'</select><input class="g-addr-city" value="'+escapeHtml(e.city||'')+'" placeholder="城市"><input class="g-addr-district" value="'+escapeHtml(e.district||'')+'" placeholder="区/县"></div><input class="g-addr-detail" value="'+escapeHtml(e.detail||'')+'" placeholder="详细地址 (街道/门牌号)"></div>';
+  }).join('');
+}
+function cardForm(c) {
+  var phones = normalizePhoneEntries(c.phones, c.phone);
+  var emails = normalizeEmailEntries(c.emails, c.email);
+  var addresses = Array.isArray(c.addresses) ? c.addresses.filter(function(a){return a.province||a.detail}) : [];
+  if (!phones.length) phones = [{label:'手机',value:''}];
+  if (!emails.length) emails = [{label:'工作',value:''}];
+  return '<div class="g-form"><div class="g-form-row-2"><input id="card-name" class="g-input-lg" placeholder="姓名 *" value="'+escapeHtml(c.name||'')+'"><input id="card-company" class="g-input-lg" placeholder="工作单位" value="'+escapeHtml(c.company||'')+'"></div><div class="g-form-row-2"><input id="card-position" class="g-input-lg" placeholder="职位" value="'+escapeHtml(c.position||'')+'"><input id="card-wechat" class="g-input-lg" placeholder="微信" value="'+escapeHtml(c.wechat||'')+'"></div><div class="g-section-label">📞 电话</div><div id="phone-container">'+renderPhoneRows(phones)+'</div><button class="g-add-btn" id="add-phone-btn">+ 添加电话</button><div class="g-section-label">📧 邮箱</div><div id="email-container">'+renderEmailRows(emails)+'</div><button class="g-add-btn" id="add-email-btn">+ 添加邮箱</button><div class="g-section-label">📍 地址</div><div id="address-container">'+renderAddressRows(addresses)+'</div><button class="g-add-btn" id="add-address-btn">+ 添加地址</button><div class="g-section-label">🎓 教育经历</div><textarea class="g-textarea-json" id="card-edu" placeholder=\'[{"school":"北京大学","degree":"本科","startYear":"2010","endYear":"2014"}]\'>'+escapeHtml(JSON.stringify(c.educationBackground||[]))+'</textarea><div class="g-section-label">💼 工作经历</div><textarea class="g-textarea-json" id="card-work" placeholder=\'[{"company":"腾讯","position":"工程师","startYear":"2014","endYear":"2020"}]\'>'+escapeHtml(JSON.stringify(c.workExperience||[]))+'</textarea><div class="g-section-label">备注</div><textarea class="g-textarea-json" id="card-remark" style="min-height:80px" placeholder="备注">'+escapeHtml(c.remark||'')+'</textarea></div>';
+}
+function collectPhoneFromDom() {
+  return Array.from(document.querySelectorAll('#phone-container .g-entry-row')).map(function(row){
+    var sel = row.querySelector('select'), inp = row.querySelector('input');
+    return {label: sel?sel.value:'手机', value: (inp?inp.value:'').trim()};
+  }).filter(function(p){return p.value;});
+}
+function collectEmailFromDom() {
+  return Array.from(document.querySelectorAll('#email-container .g-entry-row')).map(function(row){
+    var sel = row.querySelector('select'), inp = row.querySelector('input');
+    return {label: sel?sel.value:'工作', value: (inp?inp.value:'').trim()};
+  }).filter(function(e){return e.value;});
+}
+function collectAddressFromDom() {
+  return Array.from(document.querySelectorAll('#address-container .g-addr-card')).map(function(card){
+    var selects = card.querySelectorAll('select');
+    var inputs = card.querySelectorAll('input');
+    return {label: selects[0]?selects[0].value:'家庭', province: selects[1]?selects[1].value:'', city: inputs[0]?inputs[0].value.trim():'', district: inputs[1]?inputs[1].value.trim():'', detail: inputs[2]?inputs[2].value.trim():''};
+  }).filter(function(a){return a.province||a.detail;});
+}
+async function showCardEditor(id) {
+  if (!selectedLibId && !id) return toast('请先选择名片库','error');
+  const c = id ? await api('/cards/'+id) : {};
+  openModal(id?'编辑名片':'新建名片', cardForm(c) + '<div class="modal-footer"><button class="btn btn-muted" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="saveCard(' + (id||0) + ')" style="background:#1a73e8;padding:0 28px;border-radius:20px;height:40px">保存</button></div>', 'large');
+  var body = document.getElementById('modal-body');
+  body.addEventListener('click', function(e){
+    if (e.target.id === 'add-phone-btn') { e.preventDefault(); var a = collectPhoneFromDom(); a.push({label:'手机',value:''}); document.getElementById('phone-container').innerHTML = renderPhoneRows(a); }
+    if (e.target.id === 'add-email-btn') { e.preventDefault(); var a = collectEmailFromDom(); a.push({label:'工作',value:''}); document.getElementById('email-container').innerHTML = renderEmailRows(a); }
+    if (e.target.id === 'add-address-btn') { e.preventDefault(); var a = collectAddressFromDom(); a.push({label:'家庭',province:'',city:'',district:'',detail:''}); document.getElementById('address-container').innerHTML = renderAddressRows(a); }
+    if (e.target.matches('#phone-container .g-entry-del')) { e.preventDefault(); var a = collectPhoneFromDom(); var idx = Array.from(e.target.parentNode.parentNode.children).indexOf(e.target.parentNode); a.splice(idx,1); if(!a.length) a=[{label:'手机',value:''}]; document.getElementById('phone-container').innerHTML = renderPhoneRows(a); }
+    if (e.target.matches('#email-container .g-entry-del')) { e.preventDefault(); var a = collectEmailFromDom(); var idx = Array.from(e.target.parentNode.parentNode.children).indexOf(e.target.parentNode); a.splice(idx,1); if(!a.length) a=[{label:'工作',value:''}]; document.getElementById('email-container').innerHTML = renderEmailRows(a); }
+    if (e.target.matches('#address-container .g-entry-del')) { e.preventDefault(); var a = collectAddressFromDom(); var cards = document.querySelectorAll('#address-container .g-addr-card'); var idx = Array.from(cards).indexOf(e.target.parentNode.closest('.g-addr-card')); a.splice(idx,1); document.getElementById('address-container').innerHTML = renderAddressRows(a); }
+  });
+}
 async function saveCard(id) {
-  var phoneValues = document.getElementById('card-phones').value.split(',').map(function(s){return s.trim()}).filter(Boolean);
-  var phoneLabels = document.getElementById('card-phones-labels').value.split(',').map(function(s){return s.trim()}).filter(Boolean);
-  var emailValues = document.getElementById('card-emails').value.split(',').map(function(s){return s.trim()}).filter(Boolean);
-  var emailLabels = document.getElementById('card-emails-labels').value.split(',').map(function(s){return s.trim()}).filter(Boolean);
-  var phones = phoneValues.map(function(v,i){ return { value:v, label:(phoneLabels[i]||'') }; }).filter(function(p){ return p.value; });
-  var emails = emailValues.map(function(v,i){ return { value:v, label:(emailLabels[i]||'') }; }).filter(function(e){ return e.value; });
-  var edu=[], work=[], addresses=[];
-  try{ edu=JSON.parse(document.getElementById('card-edu').value||'[]'); }catch(e){ return toast('教育经历 JSON 格式不对','error'); }
-  try{ work=JSON.parse(document.getElementById('card-work').value||'[]'); }catch(e){ return toast('工作经历 JSON 格式不对','error'); }
-  try{ addresses=JSON.parse(document.getElementById('card-addresses').value||'[]'); }catch(e){ return toast('地址 JSON 格式不对','error'); }
-  var body={ libraryId:selectedLibId, name:document.getElementById('card-name').value, avatar:document.getElementById('card-avatar').value, phone:phones[0]?.value||'', phones:phones, email:emails[0]?.value||'', emails:emails, company:document.getElementById('card-company').value, position:document.getElementById('card-position').value, wechat:document.getElementById('card-wechat').value, addresses:addresses, educationBackground:edu, workExperience:work, remark:document.getElementById('card-remark').value };
+  var name = document.getElementById('card-name').value.trim();
+  if (!name) return toast('姓名必填','error');
+  var phones = collectPhoneFromDom(), emails = collectEmailFromDom(), addresses = collectAddressFromDom();
+  var edu=[], work=[];
+  try{edu=JSON.parse(document.getElementById('card-edu').value||'[]')}catch(e){return toast('教育经历 JSON 格式不对','error')}
+  try{work=JSON.parse(document.getElementById('card-work').value||'[]')}catch(e){return toast('工作经历 JSON 格式不对','error')}
+  var body = {libraryId:selectedLibId, name:name, avatar:'', phone:phones[0]?.value||'', phones:phones, email:emails[0]?.value||'', emails:emails, company:document.getElementById('card-company').value.trim(), position:document.getElementById('card-position').value.trim(), wechat:document.getElementById('card-wechat').value.trim(), addresses:addresses, educationBackground:edu, workExperience:work, remark:document.getElementById('card-remark').value.trim()};
   try{ await api(id?'/cards/'+id:'/cards',{method:id?'PUT':'POST',body}); toast('已保存','success'); closeModal(); loadCardList(); }catch(e){toast(e.message,'error')}
 }
 async function deleteCard(id) { confirmLayer({ title:'删除名片', tone:'soft', message:'删除是低频操作。确定删除这张名片？', okText:'确认删除', onOk: async()=>{ await api('/cards/'+id,{method:'DELETE'}); toast('已删除','success'); loadCardList(); }}); }

@@ -77,3 +77,28 @@ th { font-weight:600; color:var(--text-secondary); font-size:12px; } tr:hover td
 .dup-card { border:1px solid var(--border); border-radius:8px; padding:12px; margin:8px 0; } .dup-highlight span { background:#fff3e0; padding:2px 8px; border-radius:4px; font-size:11px; }
 .file-upload { display:flex; align-items:center; gap:12px; padding:20px; border:2px dashed var(--border); border-radius:12px; margin-bottom:16px; cursor:pointer; }
 @media (max-width:768px){ #sidebar{width:64px}.sidebar-title,.nav-item span,#user-info{display:none} #content{padding:16px}.form-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:repeat(2,1fr)} }
+
+/* ===== Google Contacts 风格编辑器 ===== */
+.g-form { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+.g-form-row-2 { display:flex; gap:12px; margin-bottom:12px; }
+.g-input-lg { flex:1; height:44px; border:none; border-bottom:1px solid #e0e0e0; font-size:15px; outline:none; padding:0 4px; background:transparent; }
+.g-input-lg:focus { border-bottom-color:#1a73e8; }
+.g-section-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.8px; color:#5f6368; margin:18px 0 8px; }
+.g-entry-row { display:flex; gap:8px; align-items:center; margin-bottom:6px; }
+.g-label-select { height:32px; border:1px solid #dadce0; border-radius:16px; font-size:13px; color:#1a73e8; background:#fff; padding:0 10px; outline:none; min-width:70px; cursor:pointer; }
+.g-label-select:focus { border-color:#1a73e8; }
+.g-entry-input { flex:1; height:36px; border:none; border-bottom:1px solid #e0e0e0; font-size:14px; outline:none; padding:0 2px; background:transparent; }
+.g-entry-input:focus { border-bottom-color:#1a73e8; }
+.g-entry-del { width:30px; height:30px; border:none; background:none; color:#999; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; border-radius:50%; }
+.g-entry-del:hover { background:#f1f3f4; color:#333; }
+.g-add-btn { background:none; border:none; color:#1a73e8; font-size:13px; font-weight:500; cursor:pointer; padding:6px 0; display:inline-block; }
+.g-add-btn:hover { text-decoration:underline; }
+.g-addr-card { background:#f8f9fa; border-radius:8px; padding:10px; margin-bottom:8px; }
+.g-addr-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.g-addr-line { display:flex; gap:8px; margin-bottom:6px; }
+.g-addr-select { flex:1; height:36px; border:1px solid #dadce0; border-radius:4px; font-size:13px; background:#fff; padding:0 6px; outline:none; }
+.g-addr-city, .g-addr-district { flex:1; height:36px; border:none; border-bottom:1px solid #e0e0e0; font-size:13px; outline:none; padding:0 2px; background:transparent; }
+.g-addr-detail { width:100%; height:36px; border:none; border-bottom:1px solid #e0e0e0; font-size:13px; outline:none; padding:0 2px; background:transparent; }
+.g-addr-detail:focus, .g-addr-city:focus, .g-addr-district:focus { border-bottom-color:#1a73e8; }
+.g-textarea-json { width:100%; min-height:60px; border:1px solid #dadce0; border-radius:4px; font-size:13px; font-family: 'SFMono-Regular', Consolas, monospace; padding:8px; background:#fff; resize:vertical; outline:none; }
+.g-textarea-json:focus { border-color:#1a73e8; }
